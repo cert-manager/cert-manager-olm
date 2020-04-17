@@ -9,9 +9,9 @@ metadata:
     capabilities: Full Lifecycle
     categories: Security
     certified: 'false'
-    containerImage: quay.io/jetstack/cert-manager-operator:v0.15.0
+    containerImage: quay.io/jetstack/cert-manager-operator:v0.15.0-alpha.0
     repository: https://github.com/jetstack/cert-manager
-  name: cert-manager-operator.v0.15.0
+  name: cert-manager-operator.v0.15.0-alpha.0
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -53,7 +53,7 @@ spec:
               containers:
               - name: cert-manager-operator
                 # Replace this with the built image name
-                image: quay.io/maartje/cm-operator-image-devel:latest
+                image: registry.connect.redhat.com/jetstack/cert-manager-operator:v0.15.0-alpha.0
                 env:
                 - name: POD_NAME
                   valueFrom:
@@ -87,4 +87,4 @@ spec:
   maturity: alpha
   provider:
     name: Jetstack
-  version: 0.15.0
+  version: 0.15.0-alpha.0

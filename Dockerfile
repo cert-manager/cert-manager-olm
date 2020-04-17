@@ -24,7 +24,7 @@ FROM quay.io/operator-framework/helm-operator:v0.15.1
 ### Required OpenShift Labels
 LABEL name="cert-manager Operator" \
       vendor="Jetstack" \
-      version="v0.15.0" \
+      version="v0.15.0-alpha.0" \
       release="1" \
       summary="This is the cert-manager operator." \
       description="This operator will deploy cert-manager to the cluster."
