@@ -2,9 +2,9 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    description: ""
-    createdAt: ""
-    support: ""
+    description: "x509 certificate management for Kubernetes"
+    createdAt: "2020-04-20T12:00:00Z"
+    support: "cert-manager team"
     alm-examples: ' [{"apiVersion":"operator.cert-manager.io/v1alpha1","kind":"CertManager","metadata":{"name":"cert-manager","namespace":"cert-manager"},"spec":{}}]'
     capabilities: Full Lifecycle
     categories: Security
