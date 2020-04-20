@@ -5,7 +5,7 @@ metadata:
     description: ""
     createdAt: ""
     support: ""
-    alm-examples: '[]'
+    alm-examples: ' [{"apiVersion":"operator.cert-manager.io/v1alpha1","kind":"CertManager","metadata":{"name":"cert-manager","namespace":"cert-manager"},"spec":{}}]'
     capabilities: Full Lifecycle
     categories: Security
     certified: 'false'
