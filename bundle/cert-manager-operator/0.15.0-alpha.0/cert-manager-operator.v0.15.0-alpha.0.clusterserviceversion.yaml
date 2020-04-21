@@ -52,7 +52,6 @@ spec:
               serviceAccountName: cert-manager-operator
               containers:
               - name: cert-manager-operator
-                # Replace this with the built image name
                 image: registry.connect.redhat.com/jetstack/cert-manager-operator:v0.15.0-alpha.0
                 env:
                 - name: POD_NAME
