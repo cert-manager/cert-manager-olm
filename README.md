@@ -7,4 +7,4 @@ This includes the operator itself, based on the Helm operator as well as Dockerf
 
 This repository contains all files that are used by the RedHat image builder to release the operator.
 
-For more info on cert-manager, please see [the cert-manager repository](https://github.com/jetstack/cert-manager) ot [cert-manager.io](https://cert-manager.io )
+For more info on cert-manager, please see [the cert-manager repository](https://github.com/jetstack/cert-manager) or [cert-manager.io](https://cert-manager.io)
