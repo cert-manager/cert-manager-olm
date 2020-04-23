@@ -8,7 +8,7 @@ metadata:
     alm-examples: ' [{"apiVersion":"operator.cert-manager.io/v1alpha1","kind":"CertManager","metadata":{"name":"cert-manager","namespace":"cert-manager"},"spec":{}}]'
     capabilities: Full Lifecycle
     categories: Security
-    certified: 'false'
+    certified: 'true'
     containerImage: quay.io/jetstack/cert-manager-operator:v0.15.0-alpha.1
     repository: https://github.com/jetstack/cert-manager
   name: cert-manager-operator.v0.15.0-alpha.1

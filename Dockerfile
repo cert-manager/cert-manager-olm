@@ -32,7 +32,7 @@ LABEL name="cert-manager Operator" \
       description="This operator will deploy cert-manager to the cluster."
 
 # Required Licenses
-COPY --from=cm-image /licenses /licenses
+COPY --from=cm-image /licenses /licenses/cert-manager
 
 COPY --from=chart-get /cert-manager/ ${HOME}/helm-charts/cert-manager
 COPY watches.yaml ${HOME}/watches.yaml
