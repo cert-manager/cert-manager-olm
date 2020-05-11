@@ -28,4 +28,4 @@ LABEL name="cert-manager cainjector" \
       description="This image contains the cert-manager cainjector."
 
 
-CMD "/app/cmd/cainjector/cainjector"
+ENTRYPOINT "/app/cmd/cainjector/cainjector"

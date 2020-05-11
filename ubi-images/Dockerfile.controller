@@ -27,4 +27,4 @@ LABEL name="cert-manager controller" \
       summary="This is the cert-manager controller image." \
       description="This image contains the main cert-manager controller."
 
-CMD "/app/cmd/controller/controller"
+ENTRYPOINT "/app/cmd/controller/controller"
