@@ -5,10 +5,10 @@
   chart: helm-charts/cert-manager
   overrideValues:
     image.repository: registry.connect.redhat.com/jetstack/cert-manager-controller
-    image.tag: v0.15.0-ubi.1
+    image.tag: v0.15.1-ubi
     webhook.image.repository: registry.connect.redhat.com/jetstack/cert-manager-webhook
-    webhook.image.tag: v0.15.0-ubi.1
+    webhook.image.tag: v0.15.1-ubi
     cainjector.image.repository: registry.connect.redhat.com/jetstack/cert-manager-cainjector
-    cainjector.image.tag: v0.15.0-ubi.1
+    cainjector.image.tag: v0.15.1-ubi
     installCRDs: true
-    extraArgs[0]: --acme-http01-solver-image=registry.connect.redhat.com/jetstack/cert-manager-acmesolver:v0.15.0-ubi.1
+    extraArgs[0]: --acme-http01-solver-image=registry.connect.redhat.com/jetstack/cert-manager-acmesolver:v0.15.1-ubi
