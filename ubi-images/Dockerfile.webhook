@@ -27,4 +27,4 @@ LABEL name="cert-manager webhook" \
       summary="This is the cert-manager webhook image." \
       description="This image contains the webhook server for cert-manager."
 
-ENTRYPOINT "/app/cmd/webhook/webhook"
+ENTRYPOINT ["/app/cmd/webhook/webhook"]
