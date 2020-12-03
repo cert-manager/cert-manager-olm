@@ -15,11 +15,11 @@
 FROM alpine:3.11 as chart-get
 
 RUN apk add wget tar
-RUN wget https://charts.jetstack.io/charts/cert-manager-v1.1.0.tgz
+RUN wget https://charts.jetstack.io/charts/cert-manager-v0.15.2.tgz
 # TODO: add some kind of verification
-RUN tar xzf cert-manager-v1.1.0.tgz
+RUN tar xzf cert-manager-v0.15.2.tgz
 
-FROM quay.io/jetstack/cert-manager-controller:v1.1.0 as cm-image
+FROM quay.io/jetstack/cert-manager-controller:v0.15.2 as cm-image
 
 FROM quay.io/operator-framework/helm-operator:v1.2.0
 
