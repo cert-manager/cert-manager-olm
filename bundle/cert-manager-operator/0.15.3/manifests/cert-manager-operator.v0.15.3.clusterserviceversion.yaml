@@ -87,3 +87,4 @@ spec:
   provider:
     name: Jetstack
   version: 0.15.3
+  replaces: cert-manager-operator.v0.15.2
