@@ -96,3 +96,4 @@ spec:
   - name: cert-manager-webhook
     image: registry.connect.redhat.com/jetstack/cert-manager-webhook:v1.1.0-ubi
   version: 1.1.0
+  replaces: cert-manager-operator.v0.15.3
