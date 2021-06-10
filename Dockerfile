@@ -15,18 +15,18 @@
 FROM alpine:3.11 as chart-get
 
 RUN apk add wget tar
-RUN wget https://charts.jetstack.io/charts/cert-manager-v1.1.0.tgz
+RUN wget https://charts.jetstack.io/charts/cert-manager-v1.3.1.tgz
 # TODO: add some kind of verification
-RUN tar xzf cert-manager-v1.1.0.tgz
+RUN tar xzf cert-manager-v1.3.1.tgz
 
-FROM quay.io/jetstack/cert-manager-controller:v1.1.0 as cm-image
+FROM quay.io/jetstack/cert-manager-controller:v1.3.1 as cm-image
 
 FROM quay.io/operator-framework/helm-operator:v1.2.0
 
 ### Required OpenShift Labels
 LABEL name="cert-manager Operator" \
       vendor="Jetstack" \
-      version="v1.1.0" \
+      version="v1.3.1" \
       release="1" \
       summary="This is the cert-manager operator." \
       description="This operator will deploy cert-manager to the cluster."
