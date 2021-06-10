@@ -7,8 +7,8 @@ LABEL operators.operatorframework.io.bundle.package.v1=cert-manager-operator
 LABEL operators.operatorframework.io.bundle.channels.v1=alpha,stable
 LABEL operators.operatorframework.io.bundle.channel.default.v1=stable
 
-COPY bundle/cert-manager-operator/1.1.0/manifests /manifests/
-COPY bundle/cert-manager-operator/1.1.0/metadata /metadata/
+COPY bundle/cert-manager-operator/1.3.1/manifests /manifests/
+COPY bundle/cert-manager-operator/1.3.1/metadata /metadata/
 
 LABEL com.redhat.openshift.versions="v4.5,v4.6"
 LABEL com.redhat.delivery.operator.bundle=true
