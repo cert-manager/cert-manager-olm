@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""
+Manipulate the upstream cert-manager yaml manifests so that they are more
+compatible with OLM.
+
+* Reduces the combined size of CRDs to <1MiB (the size limit of a configmap)
+  This is a work around for https://github.com/operator-framework/operator-lifecycle-manager/issues/1523
+  Adapted from
+  https://raw.githubusercontent.com/kubevirt/hyperconverged-cluster-operator/c6b425961feb0f350655ccfa7401336b30de66ab/hack/strip_old_descriptions.py
+  in https://github.com/kubevirt/hyperconverged-cluster-operator/pull/1396
+
+  Retain only the description fields of the stored API version with the exception of descriptions related to podTemplate,
+  because those are so verbose and repeated multiple times.
+
+Usage:
+  hack/fixup-cert-manager-manifests  < build/cert-manager-1.4.0.upstream.yaml > build/cert-manager-1.4.0.olm.yaml
+"""
+import sys
+
+import yaml
+
+rubbish = ("description",)
+
+
+def remove_descriptions(obj, keep=True, context=None):
+    """
+    Recursively remove any field called "description"
+    """
+    if context == "podTemplate":
+        keep = False
+
+    if isinstance(obj, dict):
+        obj = {
+            key: remove_descriptions(value, keep, context=key)
+            for key, value in obj.items()
+            if keep or key not in rubbish
+        }
+    elif isinstance(obj, list):
+        obj = [
+            remove_descriptions(item, keep, context=None)
+            for i, item in enumerate(obj)
+        ]
+    return obj
+
+
+def remove_descriptions_from_non_storage_versions_in_crd(crd):
+    """
+    Remove the description fields from the non-stored CRD versions.
+    """
+    crd_versions = crd["spec"]["versions"]
+    for i, crd_version in enumerate(crd_versions):
+        crd_versions[i] = remove_descriptions(crd_version, keep=crd_version.get("storage"))
+
+
+def main():
+    """
+    Strip duplicate description fields from all supplied CRD files.
+    """
+    for doc in yaml.safe_load_all(sys.stdin):
+        if doc.get("kind", "") == "CustomResourceDefinition":
+            remove_descriptions_from_non_storage_versions_in_crd(doc)
+        yaml.safe_dump(doc, sys.stdout)
+        sys.stdout.write("---\n")
+
+
+if __name__ == "__main__":
+    main()
