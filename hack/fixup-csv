@@ -87,6 +87,35 @@ def main():
     )
     for webhook in doc["spec"]["webhookdefinitions"]:
         webhook["generateName"] = prefixes[webhook["type"]] + "." + "webhooks.cert-manager.io"
+
+    # Workaround for OLM configuring all the webhook DNS names with a `-service` suffix.
+    # See:
+    # https://github.com/operator-framework/operator-lifecycle-manager/blob/15790a8a2f07fe65a3dbf5a45a54d35e20f2cce9/pkg/controller/install/webhook.go#L254
+    # https://github.com/operator-framework/api/blob/b51286920978aa99422358a3db74392437eaadf0/pkg/operators/v1alpha1/clusterserviceversion_types.go#L207
+    for deployment in doc["spec"]["install"]["spec"]["deployments"]:
+        # [0]["spec"]["template"]["spec"]["containers"][0]["image"]
+        if deployment["name"] != "cert-manager-webhook":
+            continue
+        for container in deployment["spec"]["template"]["spec"]["containers"]:
+            if container["name"] != "cert-manager":
+                continue
+            # Filter out the arguments we're about to change
+            args = [
+                a for a in container["args"]
+                if not a.startswith((
+                        "--dynamic-serving-dns-names",
+                        "--tls-cert-file",
+                        "--tls-private-key-file",
+                ))
+            ]
+            # Add the arguments back with the modified values
+            args.extend([
+                "--dynamic-serving-dns-names=cert-manager-webhook-service.$(POD_NAMESPACE).svc",
+                "--tls-cert-file=/tmp/k8s-webhook-server/serving-certs/tls.crt",
+                "--tls-private-key-file=/tmp/k8s-webhook-server/serving-certs/tls.key",
+            ])
+            container["args"] = args
+
     yaml.dump(doc, sys.stdout)
 
 
