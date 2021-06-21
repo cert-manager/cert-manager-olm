@@ -10,7 +10,10 @@ For reference, see the prefixes given to each webhook definition in:
 https://docs.openshift.com/container-platform/4.7/operators/operator_sdk/osdk-generating-csvs.html#olm-defining-csv-webhook_osdk-generating-csvs
 
 Usage:
-  hack/fixup-csv < build/bundle/cert-manager.clusterserviceversion.yaml > 1.4.0/manifests/cert-manager.clusterserviceversion.yaml
+  hack/fixup-csv \
+    --logo path/to/logo.png \
+    --config path/to/config.yaml \
+    < build/bundle/cert-manager.clusterserviceversion.yaml > 1.4.0/manifests/cert-manager.clusterserviceversion.yaml
 
 Important ClusterServiceVersion (CSV) file references:
 [Required Fields]: https://github.com/operator-framework/community-operators/blob/73b8b5a217b818aa0320a7f18b6a69d50e996da9/docs/packaging-required-fields.md
@@ -27,85 +30,18 @@ import yaml
 
 class literal(str):
     """
+    This is a way to force the yaml encoder to output text in block format
+    rather than as quoted strings.
+
     See https://til.simonwillison.net/python/style-yaml-dump
     """
 
 
 def literal_presenter(dumper, data):
-    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=">")
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
 
 
 yaml.add_representer(literal, literal_presenter)
-
-
-DISPLAY_NAME = "cert-manager"
-
-DESCRIPTION = literal("""
-cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
-It will ensure certificates are valid and up to date periodically, and attempt to renew certificates at an appropriate time before expiry.
-""".strip())
-MATURITY = "stable"
-
-MIN_KUBERNETES_VERSION = "1.16.0"
-
-KEYWORDS = sorted("""
-TLS
-secrets
-security
-certificates
-""".strip().splitlines())
-
-LINKS = [
-    dict(
-        name="Documentation",
-        url="https://cert-manager.io/",
-    ),
-]
-
-PROVIDER = dict(
-    name="The cert-manager maintainers",
-    url="https://cert-manager.io/",
-)
-
-MAINTAINERS = [
-    dict(
-        name="The cert-manager maintainers",
-        email="cert-manager-maintainers@googlegroups.com",
-    ),
-]
-
-ALM_EXAMPLES = literal("""
-[
-  {
-      "apiVersion": "cert-manager.io/v1",
-      "kind": "Issuer",
-      "metadata": {
-          "name": "test-selfsigned",
-          "namespace": "cert-manager-test"
-      },
-      "spec": {
-          "selfSigned": {}
-      }
-  },
-  {
-      "apiVersion": "cert-manager.io/v1",
-      "kind": "Certificate",
-      "metadata": {
-          "name": "selfsigned-cert",
-          "namespace": "cert-manager-test"
-      },
-      "spec": {
-          "dnsNames": [
-              "example.com"
-          ],
-          "issuerRef": {
-              "name": "test-selfsigned"
-          },
-          "secretName": "selfsigned-cert-tls"
-      }
-  }
-]
-""".strip())
 
 
 def main():
@@ -114,31 +50,35 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--logo", dest="logo", action="store", required=True)
+    parser.add_argument("--config", dest="config", action="store", required=True)
     args = parser.parse_args()
+
     with open(args.logo, "rb") as logo_file:
         logo_b64 = base64.standard_b64encode(logo_file.read())
     logo_type, _ = mimetypes.guess_type(args.logo)
+    with open(args.config) as config_file:
+        conf = yaml.safe_load(config_file)
     doc = yaml.safe_load(sys.stdin)
 
-    doc["metadata"]["annotations"]["capabilities"] = "Full Lifecycle"
-    doc["metadata"]["annotations"]["categories"] = "Security"
-    doc["metadata"]["annotations"]["containerImage"] = "quay.io/jetstack/cert-manager-controller:v1.4.0"
+    doc["metadata"]["annotations"]["capabilities"] = conf["capabilities"]
+    doc["metadata"]["annotations"]["categories"] = ",".join(conf["categories"])
+    doc["metadata"]["annotations"]["containerImage"] = doc["spec"]["install"]["spec"]["deployments"][0]["spec"]["template"]["spec"]["containers"][0]["image"]
     doc["metadata"]["annotations"]["createdAt"] = datetime.utcnow().isoformat(timespec="seconds")
-    doc["metadata"]["annotations"]["support"] = "The cert-manager maintainers"
-    doc["metadata"]["annotations"]["repository"] = "https://github.com/jetstack/cert-manager"
-    doc["metadata"]["annotations"]["alm-examples"] = ALM_EXAMPLES
+    doc["metadata"]["annotations"]["support"] = conf["support"]
+    doc["metadata"]["annotations"]["repository"] = conf["repository"]
+    doc["metadata"]["annotations"]["alm-examples"] = literal(conf["alm_examples"])
     doc["spec"]["icon"] = [{
         "base64data": logo_b64.decode("ascii"),
         "mediatype": logo_type,
     }]
-    doc["spec"]["displayName"] = DISPLAY_NAME
-    doc["spec"]["description"] = DESCRIPTION
-    doc["spec"]["minKubeVersion"] = MIN_KUBERNETES_VERSION
-    doc["spec"]["keywords"] = KEYWORDS
-    doc["spec"]["links"] = LINKS
-    doc["spec"]["maturity"] = MATURITY
-    doc["spec"]["provider"] = PROVIDER
-    doc["spec"]["maintainers"] = MAINTAINERS
+    doc["spec"]["displayName"] = conf["display_name"]
+    doc["spec"]["description"] = literal(conf["description"])
+    doc["spec"]["minKubeVersion"] = conf["min_kubernetes_version"]
+    doc["spec"]["keywords"] = conf["keywords"]
+    doc["spec"]["links"] = conf["links"]
+    doc["spec"]["maturity"] = conf["maturity"]
+    doc["spec"]["provider"] = conf["provider"]
+    doc["spec"]["maintainers"] = conf["maintainers"]
     # Workaround for InvalidWebhookDescription. Explained at top of this file.
     prefixes = dict(
         ValidatingAdmissionWebhook="validate",

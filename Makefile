@@ -102,14 +102,19 @@ ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
 		--version ${CERT_MANAGER_VERSION} \
 		--output-dir .
 
-bundle_dir = github.com/operator-framework/community-operators/${CERT_MANAGER_VERSION}
+bundle_base =github.com/operator-framework/community-operators
+bundle_dir = ${bundle_base}/${CERT_MANAGER_VERSION}
 bundle_dockerfile = ${bundle_dir}/bundle.Dockerfile
 bundle_csv = ${bundle_dir}/manifests/cert-manager.clusterserviceversion.yaml
+bundle_csv_global_config = ${bundle_base}/global-csv-config.yaml
 fixup_csv = hack/fixup-csv
-${bundle_csv}: ${bundle_osdk_csv} ${fixup_csv} ${cert_manager_logo}
+${bundle_csv}: ${bundle_osdk_csv} ${fixup_csv} ${cert_manager_logo} ${bundle_csv_global_config}
 	rm -rf ${bundle_dir}
 	cp -a ${bundle_osdk_dir} ${bundle_dir}
-	${fixup_csv} --logo ${cert_manager_logo} < ${bundle_osdk_csv} > $@
+	${fixup_csv} \
+		--logo ${cert_manager_logo} \
+		--config ${bundle_csv_global_config} \
+		< ${bundle_osdk_csv} > $@
 
 .PHONY: bundle-generate
 bundle-generate: ## Create / update the OLM bundle files

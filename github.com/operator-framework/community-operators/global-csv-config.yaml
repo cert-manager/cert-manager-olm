@@ -1,0 +1,69 @@
+display_name: cert-manager
+
+description: |
+  cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
+  It will ensure certificates are valid and up to date periodically, and attempt to renew certificates at an appropriate time before expiry.
+
+maturity: stable
+
+capabilities: Full Lifecycle
+
+categories:
+- Security
+
+support: The cert-manager maintainers
+
+repository: https://github.com/jetstack/cert-manager
+
+min_kubernetes_version: 1.16.0
+
+keywords:
+- TLS
+- secrets
+- security
+- certificates
+
+links:
+  - name: Documentation
+    url: https://cert-manager.io/
+
+provider:
+    name: The cert-manager maintainers
+    url: https://cert-manager.io/
+
+
+maintainers:
+- name: The cert-manager maintainers
+  email: cert-manager-maintainers@googlegroups.com
+
+alm_examples: |
+  [
+    {
+        "apiVersion": "cert-manager.io/v1",
+        "kind": "Issuer",
+        "metadata": {
+            "name": "test-selfsigned",
+            "namespace": "cert-manager-test"
+        },
+        "spec": {
+            "selfSigned": {}
+        }
+    },
+    {
+        "apiVersion": "cert-manager.io/v1",
+        "kind": "Certificate",
+        "metadata": {
+            "name": "selfsigned-cert",
+            "namespace": "cert-manager-test"
+        },
+        "spec": {
+            "dnsNames": [
+                "example.com"
+            ],
+            "issuerRef": {
+                "name": "test-selfsigned"
+            },
+            "secretName": "selfsigned-cert-tls"
+        }
+    }
+  ]
