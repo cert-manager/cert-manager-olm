@@ -1,3 +1,19 @@
+# This file contains configuration which is common to all bundle CSV files.
+#
+# Some of the CSV fields are required, and while most of these fields are filled
+# in automatically by operator-sdk generate bundle, some of the values are
+# placeholders and some are left empty.
+# See https://github.com/operator-framework/community-operators/blob/master/docs/packaging-required-fields.md
+#
+# This file contains the values for those fields which should be the same across all versions of cert-manager.
+# These values are consumed by the hack/fixup-csv script, which is executed in the Makefile.
+#
+# TODO(wallrj): some of these fields such as min_ and alm_examples apply to
+# ranges of cert-manager versions, so we need to handle that for future
+# cert-manager versions where the min_kubernetes_version may need to be
+# incremented or where new fields need to be added to the CRD samples for
+# certain cert-manager versions.
+
 display_name: cert-manager
 
 description: |

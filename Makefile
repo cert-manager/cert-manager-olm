@@ -205,7 +205,7 @@ kind-cluster: ${kind}
 	 ${kind} get clusters | grep ${E2E_CLUSTER_NAME} || ${kind} create cluster --name ${E2E_CLUSTER_NAME}
 
 .PHONY: bundle-test
-bundle-test: ## Build a bundle and test it locally
+bundle-test: ## Build a bundle and test it locally as described at https://operator-framework.github.io/community-operators/testing-operators/
 bundle-test: bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
 
 .PHONY: clean-kind-cluster
