@@ -1,19 +1,26 @@
 # cert-manager packages for OLM
 
-Definitions for the cert-manager operator published via Red Hat's [Operator Lifecycle Manager (OLM)][]
-
-[Operator Lifecycle Manager (OLM)]: https://olm.operatorframework.io/
-
-This repository contains all files that are used to package cert-manger for deployment with OLM.
+This repository contains scripts and files that are used to package cert-manager for Red Hat's [Operator Lifecycle Manager (OLM)][].
 This allows users of OpenShift and OperatorHub to easily install cert-manager into their clusters.
 It is currently an experimental deployment method.
 
+[Operator Lifecycle Manager (OLM)]: https://olm.operatorframework.io/
 [OpenShift]: https://www.okd.io/
 [OperatorHub]: https://operatorhub.io/
 
+The package is called an [Operator Bundle][] and it is a container image that stores the Kubernetes manifests and metadata associated with an operator.
+A bundle is meant to represent a specific version of an operator.
+
+The bundles are indexed in a [Catalog Image][] which is pulled by OLM in the Kubernetes cluster.
+Clients such as `kubectl operator` then interact with the [OLM CRDs][] to "subscribe" to a particular release channel.
+OLM will then install the newest cert-manager bundle in that release channel and perform upgrades as newer versions are added to that release channel.
+
+[Operator Bundle]: https://github.com/operator-framework/operator-registry/blob/master/docs/design/operator-bundle.md
+[OLM CRDs]: https://olm.operatorframework.io/docs/concepts/crds/
+
 ## Installing
 
-The simplest way to install an operator using OLM is to use the `kubectl operator` plugin, as follows:
+The simplest way to install cert-manager via OLM is to use the `kubectl operator` plugin, as follows:
 
 ```sh
 kubectl krew install operator
