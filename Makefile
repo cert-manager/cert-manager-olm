@@ -142,10 +142,15 @@ space := $(empty) $(empty)
 comma := ,
 comma-separate = $(subst ${space},${comma},$(strip $1))
 bundle_images = $(addprefix ${BUNDLE_IMG_BASE}\:,${CERT_MANAGER_VERSIONS})
+docker-image-digest = $(shell docker inspect $1 --format='{{index .RepoDigests 0}}')
 .PHONY: catalog-build
 catalog-build: ## Create a new catalog image
 catalog-build: ${opm} bundle-publish-all
-	${opm} index add --container-tool docker --mode semver --tag ${CATALOG_IMG} --bundles $(call comma-separate,${bundle_images})
+	${opm} index add \
+		--container-tool docker \
+		--mode semver \
+		--tag ${CATALOG_IMG} \
+		--bundles $(call comma-separate,$(call docker-image-digest,${bundle_images}))
 
 .PHONY: catalog-push
 catalog-push: ## Push the catalog index image
