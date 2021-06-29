@@ -34,7 +34,7 @@ description: |
   cert-manager also supports [external issuers][],
   which are out-of-tree components that provide support for other certificate authorities, such as:
   [Google Cloud Certificate Authority](https://github.com/jetstack/google-cas-issuer),
-  [AWS Private Certificate Authority](https://github.com/jniebuhr/aws-pca-issuer), and
+  [AWS Private Certificate Authority](https://github.com/cert-manager/aws-privateca-issuer), and
   [Cloudflare Origin CA](https://github.com/cloudflare/origin-ca-issuer)
 
   [external issuers]: https://cert-manager.io/docs/configuration/external/
