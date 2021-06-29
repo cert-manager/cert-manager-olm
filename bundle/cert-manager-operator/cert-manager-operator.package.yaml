@@ -1,7 +1,0 @@
-packageName: cert-manager-operator
-channels:
-- name: stable
-  currentCSV: cert-manager-operator.v1.3.1
-- name: alpha
-  currentCSV: cert-manager-operator.v1.3.1
-defaultChannel: stable

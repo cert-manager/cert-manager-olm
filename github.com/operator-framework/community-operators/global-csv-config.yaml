@@ -1,0 +1,120 @@
+# This file contains configuration which is common to all bundle CSV files.
+#
+# Some of the CSV fields are required, and while most of these fields are filled
+# in automatically by operator-sdk generate bundle, some of the values are
+# placeholders and some are left empty.
+# See https://github.com/operator-framework/community-operators/blob/master/docs/packaging-required-fields.md
+#
+# This file contains the values for those fields which should be the same across all versions of cert-manager.
+# These values are consumed by the hack/fixup-csv script, which is executed in the Makefile.
+#
+# TODO(wallrj): some of these fields such as min_ and alm_examples apply to
+# ranges of cert-manager versions, so we need to handle that for future
+# cert-manager versions where the min_kubernetes_version may need to be
+# incremented or where new fields need to be added to the CRD samples for
+# certain cert-manager versions.
+
+display_name: cert-manager
+
+description: |
+  cert-manager is a Kubernetes add-on to automate the management and issuance of TLS certificates from various issuing sources.
+  It will ensure certificates are valid and up to date periodically, and attempt to renew certificates at an appropriate time before expiry.
+
+  cert-manager has the following [built in issuers][]:
+
+  * ACME: sign certificates using Let's Encrypt (or any other [ACME][] compliant signer).
+  * Vault: sign certificates using HashiCorp Vault.
+  * Venafi: sign certificates using Venafi Cloud or Venafi Trust Protection Platform.
+  * SelfSigned: the private key of the certificate will be used to sign the certificate.
+  * CA: a private key stored as a Kubernetes Secret will be used to sign the certificate.
+
+  [built in issuers]: https://cert-manager.io/docs/configuration/#supported-issuer-types
+  [ACME]: https://datatracker.ietf.org/doc/html/rfc8555
+
+  cert-manager also supports [external issuers][],
+  which are out-of-tree components that provide support for other certificate authorities, such as:
+  [Google Cloud Certificate Authority](https://github.com/jetstack/google-cas-issuer),
+  [AWS Private Certificate Authority](https://github.com/cert-manager/aws-privateca-issuer), and
+  [Cloudflare Origin CA](https://github.com/cloudflare/origin-ca-issuer)
+
+  [external issuers]: https://cert-manager.io/docs/configuration/external/
+
+  In order to configure cert-manager to issue certificates, you must first create an Issuer or ClusterIssuer.
+  These resources represent a particular signing authority and tell cert-manager how to handle your certificate requests.
+  The [Issuer Documentation][] has more detail.
+
+  [configure cert-manager]: https://cert-manager.io/docs/configuration/
+  [Issuer Documentation]: https://cert-manager.io/docs/concepts/issuer/
+
+  Once an Issuer has been configured, you can create a Certificate resource,
+  which is a definition of a certificate request that is to be honored by an issuer
+  and which is to be kept up-to-date.
+  This is the usual way that you will interact with cert-manager to request signed certificates.
+  The [Certificate Documentation][] has more detail.
+
+  [Certificate Documentation]: https://cert-manager.io/docs/usage/certificate/
+
+maturity: stable
+
+capabilities: Full Lifecycle
+
+categories:
+- Security
+
+support: The cert-manager maintainers
+
+repository: https://github.com/jetstack/cert-manager
+
+min_kubernetes_version: 1.16.0
+
+keywords:
+- TLS
+- secrets
+- security
+- certificates
+
+links:
+  - name: Documentation
+    url: https://cert-manager.io/
+  - name: Release Notes
+    url: https://cert-manager.io/docs/release-notes
+
+provider:
+    name: The cert-manager maintainers
+    url: https://cert-manager.io/
+
+maintainers:
+- name: The cert-manager maintainers
+  email: cert-manager-maintainers@googlegroups.com
+
+alm_examples: |
+  [
+    {
+        "apiVersion": "cert-manager.io/v1",
+        "kind": "Issuer",
+        "metadata": {
+            "name": "test-selfsigned",
+            "namespace": "cert-manager-test"
+        },
+        "spec": {
+            "selfSigned": {}
+        }
+    },
+    {
+        "apiVersion": "cert-manager.io/v1",
+        "kind": "Certificate",
+        "metadata": {
+            "name": "selfsigned-cert",
+            "namespace": "cert-manager-test"
+        },
+        "spec": {
+            "dnsNames": [
+                "example.com"
+            ],
+            "issuerRef": {
+                "name": "test-selfsigned"
+            },
+            "secretName": "selfsigned-cert-tls"
+        }
+    }
+  ]
