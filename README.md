@@ -1,7 +1,7 @@
 # cert-manager packages for OLM
 
 This repository contains scripts and files that are used to package cert-manager for Red Hat's [Operator Lifecycle Manager (OLM)][].
-This allows users of OpenShift and OperatorHub to easily install cert-manager into their clusters.
+This allows users of [OpenShift][] and [OperatorHub][] to easily install cert-manager into their clusters.
 It is currently an experimental deployment method.
 
 [Operator Lifecycle Manager (OLM)]: https://olm.operatorframework.io/
@@ -17,6 +17,7 @@ OLM will then install the newest cert-manager bundle in that release channel and
 
 [Operator Bundle]: https://github.com/operator-framework/operator-registry/blob/master/docs/design/operator-bundle.md
 [OLM CRDs]: https://olm.operatorframework.io/docs/concepts/crds/
+[Catalog Image]: https://olm.operatorframework.io/docs/glossary/#index
 
 ## Installing
 
