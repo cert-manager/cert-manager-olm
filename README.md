@@ -37,9 +37,11 @@ kubectl operator install cert-manager -c stable -v 1.3.1 --create-operator-group
 * Run `make catalog-build` to generate / update all the bundle files in `./github.com/operator-framework/community-operators/`
 * [Preview the generated clusterserviceversion file on OperatorHub ](https://operatorhub.io/preview)
 * Test the generated bundle locally (See testing below)
-* Create PRs on the [communit-operators repository][] adding the new or updated bundle files to both `community-operators` and `upstream-community-operators`, as described in the [Where to contribute][] documentation.
+* Create a PR on the [Kubernetes Community Operators Repository][], adding the new or updated bundle files to the `operators/cert-manager` directory.
+* Create a PR on the [OpenShift Community Operators Repository][], adding the new or updated bundle files to the `operators/cert-manager` directory.
 
-[communit-operators repository]: https://github.com/operator-framework/community-operators
+[Kubernetes Community Operators Repository]: https://github.com/k8s-operatorhub/community-operators
+[OpenShift Community Operators Repository]: https://github.com/redhat-openshift-ecosystem/community-operators-prod
 [Where to contribute]: https://operator-framework.github.io/community-operators/contributing-where-to/
 
 ## Testing
