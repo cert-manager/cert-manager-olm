@@ -14,6 +14,7 @@ CATALOG_IMG ?= ${IMG_BASE}-olm-catalogue:${CATALOG_VERSION}
 E2E_CLUSTER_NAME ?= cert-manager-olm
 CERT_MANAGER_LOGO_URL ?= https://github.com/cert-manager/website/raw/3998bef91af7266c69f051a2f879be45eb0b3bbb/static/favicons/favicon-256.png
 define CERT_MANAGER_VERSIONS
+1.4.3
 1.4.2
 1.4.1
 1.4.0
