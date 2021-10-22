@@ -12,4 +12,6 @@ COPY bundle/cert-manager-operator/1.1.0/metadata /metadata/
 
 LABEL com.redhat.openshift.versions="v4.5,v4.6"
 LABEL com.redhat.delivery.operator.bundle=true
+# This is used to indicate support for OpenShift versions before 4.6. If you
+# don't specify this flag, your operator won't be listed in 4.5 or earlier.
 LABEL com.redhat.delivery.backport=true
