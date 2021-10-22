@@ -2,6 +2,10 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
+    # Prevent cluster upgrades to OpenShift Version 4.9 when this
+    # bundle is installed on the cluster.
+    # See https://operator-framework.github.io/community-operators/packaging-required-criteria-ocp/#configure-the-max-openshift-version-compatible
+    "olm.properties": '[{"type": "olm.maxOpenShiftVersion", "value": "4.7"}]'
     description: |
       [DEPRECATED] x509 certificate management for Kubernetes
 
