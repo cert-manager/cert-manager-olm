@@ -24,7 +24,7 @@ metadata:
     certified: 'true'
     containerImage: registry.connect.redhat.com/jetstack/cert-manager-operator:v1.1.0-ubi
     repository: https://github.com/jetstack/cert-manager
-  name: cert-manager-operator.v1.1.0
+  name: cert-manager-operator.v1.1.0-deprecated.0
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -118,5 +118,5 @@ spec:
     image: registry.connect.redhat.com/jetstack/cert-manager-cainjector:v1.1.0-ubi
   - name: cert-manager-webhook
     image: registry.connect.redhat.com/jetstack/cert-manager-webhook:v1.1.0-ubi
-  version: 1.1.0
-  replaces: cert-manager-operator.v0.15.3
+  version: 1.1.0-deprecated.0
+  replaces: cert-manager-operator.v1.1.0
