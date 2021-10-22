@@ -102,7 +102,7 @@ spec:
   maintainers:
   - email: cert-manager-maintainers@jetstack.io
     name: cert-manager team
-  maturity: stable
+  maturity: deprecated
   provider:
     name: Jetstack
   relatedImages:
