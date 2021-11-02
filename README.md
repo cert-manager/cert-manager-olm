@@ -128,3 +128,134 @@ Run some of the cert-manager E2E conformance tests:
 $ ./devel/run-e2e.sh --ginkgo.focus '[Conformance].*SelfSigned Issuer'
 ...
 ```
+
+## Testing on OpenShift
+
+There are a few ways to create an OpenShift cluster for testing.
+Here we will describe using `crc` ([code-ready-containers][crc]) to install a single node local OpenShift cluster.
+Alternatives are:
+
+* [Initializing Red Hat OpenShift Service on AWS using `rosa`][rosa]: known to work but takes ~45min to create a multi-node OpenShift cluster.
+* [Install OpenShift on any cloud using OpenShift Installer][openshift-installer]: did not work on GCP at time of writing due to
+  [Installer can't get managedZones while service account and gcloud cli can on GCP #5300][openshift-installer-issue-5300].
+
+[crc]: https://developers.redhat.com/products/codeready-containers/overview
+[rosa]: https://docs.openshift.com/rosa/rosa_cli/rosa-get-started-cli.html
+[openshift-installer]: https://github.com/openshift/installer/
+[openshift-installer-issue-5300]: https://github.com/openshift/installer/issues/5300#issuecomment-953937892
+
+### Create a host machine
+
+[`crc` requires: 4 virtual CPUs (vCPUs), 9 GiB of free memory, 35 GiB of storage space][crc-minimum-system-requirements]
+but for [crc-v1.34.0][], this is insufficient and you will need 8 CPUs and 32GiB,
+which is more than is available on most laptops, so we create a powerful cloud VM on which to run `crc`, as follows:
+
+```sh
+GOOGLE_CLOUD_PROJECT_ID=$(gcloud config get-value project)
+gcloud compute instances create crc-4-9 \
+    --project=${GOOGLE_CLOUD_PROJECT_ID} \
+    --zone=europe-west1-b \
+    --enable-nested-virtualization \
+    --min-cpu-platform="Intel Haswell" \
+    --custom-memory 32GiB \
+    --custom-cpu 8 \
+    --image-family=rhel-8 \
+    --image-project=rhel-cloud \
+    --boot-disk-size=200GiB
+
+```
+
+NOTE: The VM must support nested-virtualization because `crc` creates another VM using `libvirt`.
+
+
+[crc-minimum-system-requirements]: https://access.redhat.com/documentation/en-us/red_hat_codeready_containers/1.24/html/release_notes_and_known_issues/minimum-system-requirements_rn-ki
+[crc-v1.34.0]: https://github.com/code-ready/crc/releases/tag/v1.34.0
+### Create a `crc` cluster
+
+Now log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
+```
+gcloud compute ssh crc-4-9 -- -D 8080
+```
+
+[Download `crc` and get a pull secret][crc-download] from the RedHat Console.
+The latest version of `crc` will install the latest version of OpenShift (4.9 at time of writing).
+If you want to test on an older version of OpenShift you will need to download an older version of `crc` which corresponds to the target OpenShift version.
+
+Download the archive, extract it and move the `crc` binary to your system path:
+
+```
+curl -SLO https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc/1.34.0/crc-linux-amd64.tar.xz
+tar xf crc-linux-amd64.tar.xz
+sudo mv crc-linux-1.34.0-amd64/crc /usr/local/bin/
+```
+
+Run `crc setup` to prepare the system for running the `crc` VM:
+
+```
+crc setup
+
+...
+INFO Uncompressing crc_libvirt_4.9.0.crcbundle
+crc.qcow2: 11.50 GiB / 11.50 GiB [---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------] 100.00%
+oc: 117.16 MiB / 117.16 MiB [--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------] 100.00%
+Your system is correctly setup for using CodeReady Containers, you can now run 'crc start' to start the OpenShift cluster
+```
+
+Run `crc start` to create the VM and start OpenShift
+
+(Paste in the pull secret which you can copy from the [crc-download] page when prompted)
+
+```
+crc start
+
+...
+CodeReady Containers requires a pull secret to download content from Red Hat.
+You can copy it from the Pull Secret section of https://cloud.redhat.com/openshift/create/local.
+? Please enter the pull secret
+
+...
+
+Started the OpenShift cluster.
+
+The server is accessible via web console at:
+  https://console-openshift-console.apps-crc.testing
+
+Log in as administrator:
+  Username: kubeadmin
+  Password: ******
+
+Log in as user:
+  Username: developer
+  Password: *******
+
+Use the 'oc' command line interface:
+  $ eval $(crc oc-env)
+  $ oc login -u developer https://api.crc.testing:6443
+```
+
+[crc-download]: https://console.redhat.com/openshift/create/local
+
+### Install cert-manager
+
+
+Log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
+```
+gcloud compute ssh crc-4-9 -- -D 8080
+```
+
+
+Now configure your web browser to use the socks5 proxy at `localhost:8080`.
+Also configure it to use the socks proxy for DNS requests.
+
+
+With this configuration you should now be able to visit the OpenShift web console page:
+
+https://console-openshift-console.apps-crc.testing
+
+You will be presented with a couple of "bad SSL certificate" error pages,
+because the web console is using self-signed TLS certificiates.
+Click "Acccept and proceed anyway".
+
+Now click the "Operators > OperatorHub" link on the left hand menu.
+
+Search for "cert-manager" and click the "community" entry and then click "install".
