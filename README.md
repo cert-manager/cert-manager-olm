@@ -139,38 +139,83 @@ Alternatives are:
 * [Install OpenShift on any cloud using OpenShift Installer][openshift-installer]: did not work on GCP at time of writing due to
   [Installer can't get managedZones while service account and gcloud cli can on GCP #5300][openshift-installer-issue-5300].
 
-[crc]: https://developers.redhat.com/products/codeready-containers/overview
-[rosa]: https://docs.openshift.com/rosa/rosa_cli/rosa-get-started-cli.html
-[openshift-installer]: https://github.com/openshift/installer/
-[openshift-installer-issue-5300]: https://github.com/openshift/installer/issues/5300#issuecomment-953937892
-
-### Create a host machine
-
 [`crc` requires: 4 virtual CPUs (vCPUs), 9 GiB of free memory, 35 GiB of storage space][crc-minimum-system-requirements]
 but for [crc-v1.34.0][], this is insufficient and you will need 8 CPUs and 32GiB,
-which is more than is available on most laptops, so we create a powerful cloud VM on which to run `crc`, as follows:
+which is more than is available on most laptops.
+
+### Automatically create a VM with crc installed
+
+Download your pull secret from the [crc-download] page and supply the path in the command line below:
+
+```sh
+make -f hack/crc.mk crc-instance OPENSHIFT_VERSION=4.9 PULL_SECRET=~/Downloads/pull-secret
+```
+
+This will create a VM and automatically install the chosen version of OpenShift, using a suitable version of `crc`.
+The `crc` installation, setup and start are performed by a `startup-script` which is run when the VM boots.
+You can monitor the progress of the script as follows:
+
+```sh
+gcloud compute instances tail-serial-port-output crc-4-9
+```
+
+You can log in to the VM and interact with the cluster as follows:
+
+```sh
+gcloud compute ssh crc-4-9 -- -D 8080
+sudo journalctl -u google-startup-scripts.service  --output cat
+sudo -u crc -i
+eval $(bin/crc-1.34.0 oc-env)
+oc get pods -A
+```
+
+### Install cert-manager
+
+Log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
+```
+gcloud compute ssh crc-4-9 -- -D 8080
+```
+
+Now configure your web browser to use the socks5 proxy at `localhost:8080`.
+Also configure it to use the socks proxy for DNS requests.
+
+With this configuration you should now be able to visit the OpenShift web console page:
+
+https://console-openshift-console.apps-crc.testing
+
+You will be presented with a couple of "bad SSL certificate" error pages,
+because the web console is using self-signed TLS certificiates.
+Click "Acccept and proceed anyway".
+
+Now click the "Operators > OperatorHub" link on the left hand menu.
+
+Search for "cert-manager" and click the "community" entry and then click "install".
+
+### Manual Creation of a `crc` VM
+
+If you can't use the automated script to create the `crc` VM
+you can create one manually, as follows.
+
+#### Create a host machine
+
+Create a powerful cloud VM on which to run `crc`, as follows:
 
 ```sh
 GOOGLE_CLOUD_PROJECT_ID=$(gcloud config get-value project)
 gcloud compute instances create crc-4-9 \
-    --project=${GOOGLE_CLOUD_PROJECT_ID} \
-    --zone=europe-west1-b \
     --enable-nested-virtualization \
     --min-cpu-platform="Intel Haswell" \
     --custom-memory 32GiB \
     --custom-cpu 8 \
     --image-family=rhel-8 \
     --image-project=rhel-cloud \
-    --boot-disk-size=200GiB
-
+    --boot-disk-size=200GiB \
+    --boot-disk-type=pd-ssd
 ```
 
 NOTE: The VM must support nested-virtualization because `crc` creates another VM using `libvirt`.
 
-
-[crc-minimum-system-requirements]: https://access.redhat.com/documentation/en-us/red_hat_codeready_containers/1.24/html/release_notes_and_known_issues/minimum-system-requirements_rn-ki
-[crc-v1.34.0]: https://github.com/code-ready/crc/releases/tag/v1.34.0
-### Create a `crc` cluster
+#### Create a `crc` cluster
 
 Now log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
 ```
@@ -184,7 +229,7 @@ If you want to test on an older version of OpenShift you will need to download a
 Download the archive, extract it and move the `crc` binary to your system path:
 
 ```
-curl -SLO https://developers.redhat.com/content-gateway/file/pub/openshift-v4/clients/crc/1.34.0/crc-linux-amd64.tar.xz
+curl -SLO https://developers.redhat.com/content-gateway/rest/mirror/pub/openshift-v4/clients/crc/1.34.0/crc-linux-amd64.tar.xz
 tar xf crc-linux-amd64.tar.xz
 sudo mv crc-linux-1.34.0-amd64/crc /usr/local/bin/
 ```
@@ -233,29 +278,10 @@ Use the 'oc' command line interface:
   $ oc login -u developer https://api.crc.testing:6443
 ```
 
+[crc]: https://developers.redhat.com/products/codeready-containers/overview
+[rosa]: https://docs.openshift.com/rosa/rosa_cli/rosa-get-started-cli.html
+[openshift-installer]: https://github.com/openshift/installer/
+[openshift-installer-issue-5300]: https://github.com/openshift/installer/issues/5300#issuecomment-953937892
 [crc-download]: https://console.redhat.com/openshift/create/local
-
-### Install cert-manager
-
-
-Log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
-```
-gcloud compute ssh crc-4-9 -- -D 8080
-```
-
-
-Now configure your web browser to use the socks5 proxy at `localhost:8080`.
-Also configure it to use the socks proxy for DNS requests.
-
-
-With this configuration you should now be able to visit the OpenShift web console page:
-
-https://console-openshift-console.apps-crc.testing
-
-You will be presented with a couple of "bad SSL certificate" error pages,
-because the web console is using self-signed TLS certificiates.
-Click "Acccept and proceed anyway".
-
-Now click the "Operators > OperatorHub" link on the left hand menu.
-
-Search for "cert-manager" and click the "community" entry and then click "install".
+[crc-minimum-system-requirements]: https://access.redhat.com/documentation/en-us/red_hat_codeready_containers/1.24/html/release_notes_and_known_issues/minimum-system-requirements_rn-ki
+[crc-v1.34.0]: https://github.com/code-ready/crc/releases/tag/v1.34.0
