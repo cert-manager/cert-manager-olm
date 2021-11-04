@@ -54,8 +54,6 @@ Run `make bundle-test` to create the bundle and catalog then deploy them with OL
 make bundle-test
 ```
 
-
-
 Wait for the CSV to be created:
 
 ```
@@ -148,7 +146,7 @@ which is more than is available on most laptops.
 Download your pull secret from the [crc-download] page and supply the path in the command line below:
 
 ```sh
-make -f hack/crc.mk crc-instance OPENSHIFT_VERSION=4.9 PULL_SECRET=~/Downloads/pull-secret
+make crc-instance OPENSHIFT_VERSION=4.9 PULL_SECRET=${HOME}/Downloads/pull-secret
 ```
 
 This will create a VM and automatically install the chosen version of OpenShift, using a suitable version of `crc`.
@@ -162,9 +160,8 @@ gcloud compute instances tail-serial-port-output crc-4-9
 You can log in to the VM and interact with the cluster as follows:
 
 ```sh
-gcloud compute ssh crc-4-9 -- -D 8080
+gcloud compute ssh crc@crc-4-9 -- -D 8080
 sudo journalctl -u google-startup-scripts.service  --output cat
-sudo -u crc -i
 eval $(bin/crc-1.34.0 oc-env)
 oc get pods -A
 ```
@@ -173,7 +170,7 @@ oc get pods -A
 
 Log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
 ```
-gcloud compute ssh crc-4-9 -- -D 8080
+gcloud compute ssh crc@crc-4-9 -- -D 8080
 ```
 
 Now configure your web browser to use the socks5 proxy at `localhost:8080`.
@@ -219,7 +216,7 @@ NOTE: The VM must support nested-virtualization because `crc` creates another VM
 
 Now log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
 ```
-gcloud compute ssh crc-4-9 -- -D 8080
+gcloud compute ssh crc@crc-4-9 -- -D 8080
 ```
 
 [Download `crc` and get a pull secret][crc-download] from the RedHat Console.

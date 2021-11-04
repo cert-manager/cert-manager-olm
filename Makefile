@@ -227,3 +227,40 @@ clean-kind-cluster: ${kind}
 .PHONY: clean-bundle-test
 clean-bundle-test: ${kind}
 	 kubectl -n operators delete clusterserviceversions,subscriptions --all
+
+
+# The desired version of OpenShift.
+# This should be supplied when running `make crc-instance OPENSHIFT_VERSION=4.8`
+# on your laptop, and the version you supply will then be added to the metadata
+# of the VM so that it can be downloaded from the metadata API by the crc setup
+# scripts that run inside the VM.
+OPENSHIFT_VERSION ?= 4.9
+
+# The path to the pull-secret which you download from https://console.redhat.com/openshift/create/local
+PULL_SECRET ?=
+
+# The name of the VM.
+# Default is crc-OPENSHIFT_VERSION
+CRC_INSTANCE_NAME ?= crc-$(subst .,-,${OPENSHIFT_VERSION})
+
+# These scripts are added to the metadata of the VM startup-script installs make
+# and creates a crc user, before downloading and running the crc.mk file to
+# install crc, and then run crc setup and crc install
+startup_script := hack/crc-instance-startup-script.sh
+crc_makefile := hack/crc.mk
+
+.PHONY: crc-instance
+crc-instance: ${PULL_SECRET} ${startup_script} ${crc_makefile}
+	: $${PULL_SECRET:?"Please set PULL_SECRET to the path to the pull-secret downloaded from https://console.redhat.com/openshift/create/local"}
+	gcloud compute instances create ${CRC_INSTANCE_NAME} \
+		--enable-nested-virtualization \
+		--min-cpu-platform="Intel Haswell" \
+		--custom-memory 32GiB \
+		--custom-cpu 8 \
+		--image-family=rhel-8 \
+		--image-project=rhel-cloud \
+		--preemptible \
+		--boot-disk-size=200GiB \
+		--boot-disk-type=pd-ssd \
+		--metadata-from-file=make-file=${crc_makefile},pull-secret=${PULL_SECRET},startup-script=${startup_script} \
+		--metadata=openshift-version=${OPENSHIFT_VERSION}
