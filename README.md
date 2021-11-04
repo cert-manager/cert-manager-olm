@@ -188,6 +188,28 @@ Now click the "Operators > OperatorHub" link on the left hand menu.
 
 Search for "cert-manager" and click the "community" entry and then click "install".
 
+### Run E2E Tests on crc cluster
+
+Once you have installed cert-manager on the `crc-instance` you can run the cert-manager E2E tests,
+to verify that cert-manager has been installed properly and is reconciling Certificates.
+
+First compile the cert-manager E2E test binary as follows:
+
+```sh
+cd projects/cert-manager/cert-manager
+bazel build //test/e2e:e2e
+```
+
+And then upload the binary to the remote VM and run them against cert-manager installed in the crc OpenShift cluster:
+
+```sh
+cd projects/cert-manager/cert-manager-olm
+make crc-e2e \
+  OPENSHIFT_VERSION=4.8 \
+  PULL_SECRET=~/Downloads/pull-secret \
+  E2E_TEST=../cert-manager/bazel-bin/test/e2e/e2e.test
+```
+
 ### Manual Creation of a `crc` VM
 
 If you can't use the automated script to create the `crc` VM
