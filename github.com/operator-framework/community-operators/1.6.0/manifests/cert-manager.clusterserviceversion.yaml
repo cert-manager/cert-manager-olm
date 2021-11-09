@@ -36,7 +36,7 @@ metadata:
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.6.0
-    createdAt: '2021-10-28T08:08:57'
+    createdAt: '2021-11-09T14:25:02'
     operators.operatorframework.io/builder: operator-sdk-v1.7.1+git
     operators.operatorframework.io/project_layout: unknown
     repository: https://github.com/jetstack/cert-manager
@@ -647,8 +647,8 @@ spec:
                 - --dynamic-serving-ca-secret-namespace=$(POD_NAMESPACE)
                 - --dynamic-serving-ca-secret-name=cert-manager-webhook-ca
                 - --dynamic-serving-dns-names=cert-manager-webhook-service.$(POD_NAMESPACE).svc
-                - --tls-cert-file=/tmp/k8s-webhook-server/serving-certs/tls.crt
-                - --tls-private-key-file=/tmp/k8s-webhook-server/serving-certs/tls.key
+                - --tls-cert-file=/apiserver.local.config/certificates/apiserver.crt
+                - --tls-private-key-file=/apiserver.local.config/certificates/apiserver.key
                 env:
                 - name: POD_NAMESPACE
                   valueFrom:
