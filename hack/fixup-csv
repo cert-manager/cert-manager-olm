@@ -111,8 +111,10 @@ def main():
             # Add the arguments back with the modified values
             args.extend([
                 "--dynamic-serving-dns-names=cert-manager-webhook-service.$(POD_NAMESPACE).svc",
-                "--tls-cert-file=/tmp/k8s-webhook-server/serving-certs/tls.crt",
-                "--tls-private-key-file=/tmp/k8s-webhook-server/serving-certs/tls.key",
+                # Use certificate paths that are compatible with OpenShift 4.6:
+                # https://olm.operatorframework.io/docs/advanced-tasks/adding-admission-and-conversion-webhooks/#certificate-authority-requirements
+                "--tls-cert-file=/apiserver.local.config/certificates/apiserver.crt",
+                "--tls-private-key-file=/apiserver.local.config/certificates/apiserver.key",
             ])
             container["args"] = args
 
