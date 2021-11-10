@@ -36,8 +36,8 @@ metadata:
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.4.3
-    createdAt: '2021-11-09T14:25:57'
-    operators.operatorframework.io/builder: operator-sdk-v1.7.1+git
+    createdAt: '2021-11-10T07:23:16'
+    operators.operatorframework.io/builder: operator-sdk-v1.13.0+git
     operators.operatorframework.io/project_layout: unknown
     repository: https://github.com/jetstack/cert-manager
     support: The cert-manager maintainers
@@ -838,6 +838,23 @@ spec:
     - v1
     - v1beta1
     containerPort: 443
+    conversionCRDs:
+    - certificaterequests.cert-manager.io
+    - certificates.cert-manager.io
+    - challenges.acme.cert-manager.io
+    - clusterissuers.cert-manager.io
+    - issuers.cert-manager.io
+    - orders.acme.cert-manager.io
+    deploymentName: cert-manager-webhook
+    generateName: convert.webhooks.cert-manager.io
+    sideEffects: None
+    targetPort: 10250
+    type: ConversionWebhook
+    webhookPath: /convert
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    containerPort: 443
     deploymentName: cert-manager-webhook
     failurePolicy: Fail
     generateName: validate.webhooks.cert-manager.io
@@ -880,20 +897,3 @@ spec:
     timeoutSeconds: 10
     type: MutatingAdmissionWebhook
     webhookPath: /mutate
-  - admissionReviewVersions:
-    - v1
-    - v1beta1
-    containerPort: 443
-    conversionCRDs:
-    - certificaterequests.cert-manager.io
-    - certificates.cert-manager.io
-    - challenges.acme.cert-manager.io
-    - clusterissuers.cert-manager.io
-    - issuers.cert-manager.io
-    - orders.acme.cert-manager.io
-    deploymentName: cert-manager-webhook
-    generateName: convert.webhooks.cert-manager.io
-    sideEffects: None
-    targetPort: 10250
-    type: ConversionWebhook
-    webhookPath: /convert
