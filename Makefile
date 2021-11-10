@@ -6,6 +6,11 @@ SHELL := bash
 .SUFFIXES:
 .ONESHELL:
 
+CERT_MANAGER_VERSION ?= 1.6.1
+BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}
+CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
+OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
+
 # from https://suva.sh/posts/well-documented-makefiles/
 .PHONY: help
 help: ## Display this help
@@ -14,24 +19,10 @@ help: ## Display this help
 OLM_PACKAGE_NAME ?= cert-manager
 IMG_BASE ?= gcr.io/jetstack-richard/cert-manager
 BUNDLE_IMG_BASE ?= ${IMG_BASE}-olm-bundle
-BUNDLE_IMG ?= ${BUNDLE_IMG_BASE}:${CERT_MANAGER_VERSION}
-CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
+BUNDLE_IMG ?= ${BUNDLE_IMG_BASE}:${BUNDLE_VERSION}
 CATALOG_IMG ?= ${IMG_BASE}-olm-catalogue:${CATALOG_VERSION}
 E2E_CLUSTER_NAME ?= cert-manager-olm
 CERT_MANAGER_LOGO_URL ?= https://github.com/cert-manager/website/raw/3998bef91af7266c69f051a2f879be45eb0b3bbb/static/favicons/favicon-256.png
-define CERT_MANAGER_VERSIONS
-1.6.1
-1.6.0
-1.5.4
-1.5.3
-1.4.4
-1.4.3
-1.4.2
-1.4.1
-1.4.0
-1.3.1
-endef
-CERT_MANAGER_VERSION ?= $(firstword ${CERT_MANAGER_VERSIONS})
 
 KUSTOMIZE_VERSION ?= 4.4.0
 KIND_VERSION ?= 0.11.1
@@ -65,9 +56,9 @@ ${downloadable_executables}:
 	curl --remote-time -sSL -o $@ ${url}
 	chmod +x $@
 
-build_v = build/${CERT_MANAGER_VERSION}
+build_v = build/${BUNDLE_VERSION}
 
-cert_manager_manifest_upstream = ${build_v}/cert-manager.${CERT_MANAGER_VERSION}.upstream.yaml
+cert_manager_manifest_upstream = build/cert-manager.${CERT_MANAGER_VERSION}.upstream.yaml
 ${cert_manager_manifest_upstream}: url := https://github.com/jetstack/cert-manager/releases/download/v${CERT_MANAGER_VERSION}/cert-manager.yaml
 
 cert_manager_logo = build/cert-manager-logo.png
@@ -113,14 +104,13 @@ ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
 		--channels stable \
 		--default-channel stable \
 		--package ${OLM_PACKAGE_NAME} \
-		--version ${CERT_MANAGER_VERSION} \
+		--version ${BUNDLE_VERSION} \
 		--output-dir .
 
-bundle_base =github.com/operator-framework/community-operators
-bundle_dir = ${bundle_base}/${CERT_MANAGER_VERSION}
+bundle_dir = bundle
 bundle_dockerfile = ${bundle_dir}/bundle.Dockerfile
 bundle_csv = ${bundle_dir}/manifests/cert-manager.clusterserviceversion.yaml
-bundle_csv_global_config = ${bundle_base}/global-csv-config.yaml
+bundle_csv_global_config = global-csv-config.yaml
 fixup_csv = hack/fixup-csv
 ${bundle_csv}: ${bundle_osdk_csv} ${fixup_csv} ${cert_manager_logo} ${bundle_csv_global_config}
 	rm -rf ${bundle_dir}
@@ -139,32 +129,19 @@ bundle-build: ## Create a cert-manager OLM bundle image
 bundle-build: ${bundle_csv} ${bundle_dockerfile}
 	docker build -f ${bundle_dockerfile} -t ${BUNDLE_IMG} ${bundle_dir}
 
-.do-bundle-publish-for-version/%:
-	$(MAKE) CERT_MANAGER_VERSION=$* bundle-build bundle-push
-
-.PHONY: bundle-publish-all
-bundle-publish-all: ## Build and push all bundle versions
-bundle-publish-all: $(addprefix .do-bundle-publish-for-version/,${CERT_MANAGER_VERSIONS})
-
 .PHONY: bundle-push
 bundle-push: ## Push the OLM bundle image
 bundle-push:
 	docker push ${BUNDLE_IMG}
 
-empty :=
-space := $(empty) $(empty)
-comma := ,
-comma-separate = $(subst ${space},${comma},$(strip $1))
-bundle_images = $(addprefix ${BUNDLE_IMG_BASE}\:,${CERT_MANAGER_VERSIONS})
-docker-image-digest = $(shell docker inspect $1 --format='{{index .RepoDigests 0}}')
 .PHONY: catalog-build
 catalog-build: ## Create a new catalog image
-catalog-build: ${opm} bundle-publish-all
+catalog-build: ${opm}
 	${opm} index add \
 		--container-tool docker \
 		--mode semver \
 		--tag ${CATALOG_IMG} \
-		--bundles $(call comma-separate,$(call docker-image-digest,${bundle_images}))
+		--bundles ${BUNDLE_IMG}
 
 .PHONY: catalog-push
 catalog-push: ## Push the catalog index image
@@ -198,7 +175,6 @@ metadata:
 spec:
  channel: stable
  name: cert-manager
- startingCSV: cert-manager.v$(lastword ${CERT_MANAGER_VERSIONS})
  source: cert-manager-test-catalog
  sourceNamespace: olm
 endef
