@@ -26,19 +26,25 @@ The simplest way to install cert-manager via OLM is to use the `kubectl operator
 ```sh
 kubectl krew install operator
 kubectl operator list-available
-kubectl operator install cert-manager -c stable -v 1.3.1 --create-operator-group
+kubectl operator install cert-manager -c stable -v 1.6.1
 ```
 
 [kubectl operator plugin]: https://github.com/operator-framework/kubectl-operator
 
 ## Release Process
 
-* Add the new version of cert-manager to the `CERT_MANAGER_VERSIONS` list at the top of the `Makefile`
-* Run `make catalog-build` to generate / update all the bundle files in `./github.com/operator-framework/community-operators/`
+* Add the new version to `CERT_MANAGER_VERSION` at the top of the `Makefile`
+* Run `make bundle-build bundle-push catalog-build catalog-push` to generate a bundle and a catalog.
+* Run `make bundle-validate` to check the generated bundle files.
+* `git commit` the bundle changes.
 * [Preview the generated clusterserviceversion file on OperatorHub ](https://operatorhub.io/preview)
 * Test the generated bundle locally (See testing below)
-* Create a PR on the [Kubernetes Community Operators Repository][], adding the new or updated bundle files to the `operators/cert-manager` directory.
-* Create a PR on the [OpenShift Community Operators Repository][], adding the new or updated bundle files to the `operators/cert-manager` directory.
+* Create a PR on the [Kubernetes Community Operators Repository][],
+  adding the new or updated bundle files to `operators/cert-manager/`
+  under a sub-directory named after the bundle version
+* Create a PR on the [OpenShift Community Operators Repository][],
+  adding the new or updated bundle files to `operators/cert-manager/`
+  under a sub-directory named after the bundle version
 
 [Kubernetes Community Operators Repository]: https://github.com/k8s-operatorhub/community-operators
 [OpenShift Community Operators Repository]: https://github.com/redhat-openshift-ecosystem/community-operators-prod
@@ -46,7 +52,7 @@ kubectl operator install cert-manager -c stable -v 1.3.1 --create-operator-group
 
 ## Testing
 
-The bundles Docker images and a temporary catalog Docker image can be built and pushed to a personal Docker registry.
+The bundle Docker image and a temporary catalog Docker image can be built and pushed to a personal Docker registry.
 These can then be used by OLM running on a Kubernetes cluster.
 Run `make bundle-test` to create the bundle and catalog then deploy them with OLM, installed on a local Kind cluster, for testing.
 
@@ -85,38 +91,6 @@ LAST SEEN   TYPE     REASON                OBJECT                               
 0s          Normal   Pulling               pod/cert-manager-webhook-649f87bd5b-7swpk      Pulling image "quay.io/jetstack/cert-manager-webhook:v1.3.1"
 0s          Normal   InstallSucceeded      clusterserviceversion/cert-manager.v1.3.1      waiting for install components to report healthy
 0s          Normal   InstallWaiting        clusterserviceversion/cert-manager.v1.3.1      installing: waiting for deployment cert-manager to become ready: deployment "cert-manager" not available: Deployment does not have minimum availability.
-
-```
-
-
-Watch OLM then upgrade to cert-manager 1.4.0
-```
-0s          Normal   InstallSucceeded      clusterserviceversion/cert-manager.v1.3.1      install strategy completed with no errors
-0s          Normal   RequirementsUnknown   clusterserviceversion/cert-manager.v1.4.0      requirements not yet checked
-0s          Normal   RequirementsNotMet    clusterserviceversion/cert-manager.v1.4.0      one or more requirements couldn't be found
-0s          Normal   BeingReplaced         clusterserviceversion/cert-manager.v1.3.1      being replaced by csv: cert-manager.v1.4.0
-0s          Normal   AllRequirementsMet    clusterserviceversion/cert-manager.v1.4.0      all requirements found, attempting install
-0s          Normal   ScalingReplicaSet     deployment/cert-manager                        Scaled up replica set cert-manager-69f886dcd to 1
-0s          Normal   SuccessfulCreate      replicaset/cert-manager-69f886dcd              Created pod: cert-manager-69f886dcd-glqrw
-0s          Normal   Scheduled             pod/cert-manager-69f886dcd-glqrw               Successfully assigned operators/cert-manager-69f886dcd-glqrw to cert-manager-olm-control-plane
-0s          Normal   Pulling               pod/cert-manager-69f886dcd-glqrw               Pulling image "quay.io/jetstack/cert-manager-controller:v1.4.0"
-0s          Normal   ScalingReplicaSet     deployment/cert-manager-cainjector             Scaled up replica set cert-manager-cainjector-54669f6494 to 1
-0s          Normal   SuccessfulCreate      replicaset/cert-manager-cainjector-54669f6494   Created pod: cert-manager-cainjector-54669f6494-4qjjn
-0s          Normal   Scheduled             pod/cert-manager-cainjector-54669f6494-4qjjn    Successfully assigned operators/cert-manager-cainjector-54669f6494-4qjjn to cert-manager-olm-control-plane
-0s          Normal   Pulling               pod/cert-manager-cainjector-54669f6494-4qjjn    Pulling image "quay.io/jetstack/cert-manager-cainjector:v1.4.0"
-0s          Normal   ScalingReplicaSet     deployment/cert-manager-webhook                 Scaled up replica set cert-manager-webhook-7bb69c56f7 to 1
-0s          Normal   SuccessfulCreate      replicaset/cert-manager-webhook-7bb69c56f7      Created pod: cert-manager-webhook-7bb69c56f7-9vbr8
-0s          Normal   Scheduled             pod/cert-manager-webhook-7bb69c56f7-9vbr8       Successfully assigned operators/cert-manager-webhook-7bb69c56f7-9vbr8 to cert-manager-olm-control-plane
-0s          Normal   Pulling               pod/cert-manager-webhook-7bb69c56f7-9vbr8       Pulling image "quay.io/jetstack/cert-manager-webhook:v1.4.0"
-0s          Normal   InstallSucceeded      clusterserviceversion/cert-manager.v1.4.0       waiting for install components to report healthy
-1s          Normal   InstallWaiting        clusterserviceversion/cert-manager.v1.4.0       installing: waiting for deployment cert-manager to become ready: deployment "cert-manager" waiting for 1 outdated replica(s) to be terminated
-0s          Normal   Pulled                pod/cert-manager-69f886dcd-glqrw                Successfully pulled image "quay.io/jetstack/cert-manager-controller:v1.4.0" in 29.231317695s
-0s          Normal   Created               pod/cert-manager-69f886dcd-glqrw                Created container cert-manager
-0s          Normal   Started               pod/cert-manager-69f886dcd-glqrw                Started container cert-manager
-0s          Normal   ScalingReplicaSet     deployment/cert-manager                         Scaled down replica set cert-manager-74d7f9dff to 0
-0s          Normal   SuccessfulDelete      replicaset/cert-manager-74d7f9dff               Deleted pod: cert-manager-74d7f9dff-72g4t
-0s          Normal   Killing               pod/cert-manager-74d7f9dff-72g4t                Stopping container cert-manager
-0s          Normal   InstallWaiting        clusterserviceversion/cert-manager.v1.4.0       installing: waiting for deployment cert-manager-cainjector to become ready: deployment "cert-manager-cainjector" waiting for 1 outdated replica(s) to be terminated
 
 ```
 
