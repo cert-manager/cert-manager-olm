@@ -125,7 +125,7 @@ spec:
               - args:
                 - --leader-elect
                 - --leader-election-id=cert-manager-operator
-                image: controller:latest
+                image: gcr.io/jetstack-richard/cert-manager-operator:v1.1.0
                 livenessProbe:
                   httpGet:
                     path: /healthz
