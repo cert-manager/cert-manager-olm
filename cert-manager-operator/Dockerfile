@@ -21,7 +21,7 @@ RUN tar xzf cert-manager-v1.1.0.tgz
 
 FROM quay.io/jetstack/cert-manager-controller:v1.1.0 as cm-image
 
-FROM quay.io/operator-framework/helm-operator:v1.2.0
+FROM quay.io/operator-framework/helm-operator:v1.14.0
 
 ### Required OpenShift Labels
 LABEL name="cert-manager Operator" \
@@ -34,5 +34,7 @@ LABEL name="cert-manager Operator" \
 # Required Licenses
 COPY --from=cm-image /licenses /licenses/cert-manager
 
+ENV HOME=/opt/helm
 COPY --from=chart-get /cert-manager/ ${HOME}/helm-charts/cert-manager
 COPY watches.yaml ${HOME}/watches.yaml
+WORKDIR ${HOME}

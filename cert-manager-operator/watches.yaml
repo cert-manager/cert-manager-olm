@@ -1,6 +1,6 @@
----
-- version: v1alpha1
-  group: operator.cert-manager.io
+# Use the 'create api' subcommand to add watches to this file.
+- group: operator.cert-manager.io
+  version: v1alpha1
   kind: CertManager
   chart: helm-charts/cert-manager
   overrideValues:
@@ -12,3 +12,4 @@
     cainjector.image.tag: v1.1.0-ubi
     installCRDs: true
     extraArgs[0]: --acme-http01-solver-image=registry.connect.redhat.com/jetstack/cert-manager-acmesolver:v1.1.0-ubi
+#+kubebuilder:scaffold:watch
