@@ -118,3 +118,15 @@ alm_examples: |
         }
     }
   ]
+
+# A list of architectures for which there are cert-manager Docker images.
+# TODO: In future we should add arm (ARCH) and darwin and windows (OS)
+# but for now I've only listed the ARCH that were in the original downstream PR:
+# https://github.com/redhat-openshift-ecosystem/community-operators-prod/pull/434.
+#
+# See also https://olm.operatorframework.io/docs/advanced-tasks/ship-operator-supporting-multiarch/
+architectures:
+  - amd64
+  - arm64
+  - ppc64le
+  - s390x
