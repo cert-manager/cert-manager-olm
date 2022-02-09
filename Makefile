@@ -235,7 +235,6 @@ crc_makefile := hack/crc.mk
 .PHONY: crc-instance
 crc-instance: ## Create a Google Cloud Instance with a crc OpenShift cluster
 crc-instance: ${PULL_SECRET} ${startup_script} ${crc_makefile}
-	if gcloud compute instances list --filter=name=${CRC_INSTANCE_NAME}; then exit; fi
 	: $${PULL_SECRET:?"Please set PULL_SECRET to the path to the pull-secret downloaded from https://console.redhat.com/openshift/create/local"}
 	gcloud compute instances create ${CRC_INSTANCE_NAME} \
 		--enable-nested-virtualization \
