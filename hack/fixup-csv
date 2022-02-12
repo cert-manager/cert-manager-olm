@@ -60,6 +60,13 @@ def main():
         conf = yaml.safe_load(config_file)
     doc = yaml.safe_load(sys.stdin)
 
+    # Add multiarch labels.
+    # See https://olm.operatorframework.io/docs/advanced-tasks/ship-operator-supporting-multiarch/
+    doc["metadata"].setdefault("labels", {}).update({
+        f"operatorframework.io/arch.{arch}": "supported"
+        for arch in conf["architectures"]
+    })
+
     doc["metadata"]["annotations"]["capabilities"] = conf["capabilities"]
     doc["metadata"]["annotations"]["categories"] = ",".join(conf["categories"])
     doc["metadata"]["annotations"]["containerImage"] = doc["spec"]["install"]["spec"]["deployments"][0]["spec"]["template"]["spec"]["containers"][0]["image"]
