@@ -47,12 +47,28 @@ metadata:
             "name": "example-certificaterequest"
           },
           "spec": {}
+        },
+        {
+          "apiVersion": "acme.cert-manager.io/v1",
+          "kind": "Order",
+          "metadata": {
+            "name": "example-order"
+          },
+          "spec": {}
+        },
+        {
+          "apiVersion": "acme.cert-manager.io/v1",
+          "kind": "Challenge",
+          "metadata": {
+            "name": "example-challenge"
+          },
+          "spec": {}
         }
       ]
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.6.1
-    createdAt: '2022-02-15T22:09:42'
+    createdAt: '2022-02-15T22:11:24'
     operators.operatorframework.io/builder: operator-sdk-v1.13.0+git
     operators.operatorframework.io/internal-objects: |-
       [

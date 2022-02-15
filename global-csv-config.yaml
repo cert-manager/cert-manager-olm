@@ -115,6 +115,16 @@ alm_examples:
   metadata:
     name: "example-certificaterequest"
   spec: {}
+- apiVersion: "acme.cert-manager.io/v1"
+  kind: "Order"
+  metadata:
+    name: "example-order"
+  spec: {}
+- apiVersion: "acme.cert-manager.io/v1"
+  kind: "Challenge"
+  metadata:
+    name: "example-challenge"
+  spec: {}
 
 
 # A list of architectures for which there are cert-manager Docker images.
