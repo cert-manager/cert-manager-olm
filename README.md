@@ -1,3 +1,5 @@
+[![lint](https://github.com/jetstack/cert-manager-olm/actions/workflows/lint.yaml/badge.svg)](https://github.com/jetstack/cert-manager-olm/actions/workflows/lint.yaml)
+
 # cert-manager packages for OLM
 
 This repository contains scripts and files that are used to package cert-manager for Red Hat's [Operator Lifecycle Manager (OLM)][].
