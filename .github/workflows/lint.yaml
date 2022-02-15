@@ -1,0 +1,17 @@
+# Run static checks
+name: lint
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+jobs:
+  bundle-validate:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: make bundle-validate
