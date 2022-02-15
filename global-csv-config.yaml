@@ -110,6 +110,11 @@ alm_examples:
     issuerRef:
       name: "example-issuer"
     secretName: "example-certificate-tls"
+- apiVersion: "cert-manager.io/v1"
+  kind: "CertificateRequest"
+  metadata:
+    name: "example-certificaterequest"
+  spec: {}
 
 
 # A list of architectures for which there are cert-manager Docker images.
