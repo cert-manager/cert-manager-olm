@@ -87,37 +87,26 @@ maintainers:
 - name: The cert-manager maintainers
   email: cert-manager-maintainers@googlegroups.com
 
-alm_examples: |
-  [
-    {
-        "apiVersion": "cert-manager.io/v1",
-        "kind": "Issuer",
-        "metadata": {
-            "name": "test-selfsigned",
-            "namespace": "cert-manager-test"
-        },
-        "spec": {
-            "selfSigned": {}
-        }
-    },
-    {
-        "apiVersion": "cert-manager.io/v1",
-        "kind": "Certificate",
-        "metadata": {
-            "name": "selfsigned-cert",
-            "namespace": "cert-manager-test"
-        },
-        "spec": {
-            "dnsNames": [
-                "example.com"
-            ],
-            "issuerRef": {
-                "name": "test-selfsigned"
-            },
-            "secretName": "selfsigned-cert-tls"
-        }
-    }
-  ]
+alm_examples:
+- apiVersion: "cert-manager.io/v1"
+  kind: "Issuer"
+  metadata:
+    name: "test-selfsigned"
+    namespace: "cert-manager-test"
+  spec:
+    selfSigned: {}
+- apiVersion: "cert-manager.io/v1"
+  kind: "Certificate"
+  metadata:
+    name: "selfsigned-cert"
+    namespace: "cert-manager-test"
+  spec:
+    dnsNames:
+    - "example.com"
+    issuerRef:
+      name: "test-selfsigned"
+      secretName: "selfsigned-cert-tls"
+
 
 # A list of architectures for which there are cert-manager Docker images.
 # TODO: In future we should add arm (ARCH) and darwin and windows (OS)
