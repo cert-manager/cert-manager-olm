@@ -21,6 +21,7 @@ Important ClusterServiceVersion (CSV) file references:
 """
 import argparse
 import base64
+import json
 import mimetypes
 import sys
 from datetime import datetime
@@ -67,6 +68,14 @@ def main():
         for arch in conf["architectures"]
     })
 
+    # Hide some internal APIs from the OperatorHub UI
+    # https://docs.okd.io/4.9/operators/operator_sdk/osdk-generating-csvs.html#osdk-hiding-internal-objects_osdk-generating-csvs
+    doc["metadata"]["annotations"]["operators.operatorframework.io/internal-objects"] = literal(
+        json.dumps([
+            "challenge.acme.cert-manager.io",
+            "order.acme.cert-manager.io",
+        ], indent=4)
+    )
     doc["metadata"]["annotations"]["capabilities"] = conf["capabilities"]
     doc["metadata"]["annotations"]["categories"] = ",".join(conf["categories"])
     doc["metadata"]["annotations"]["containerImage"] = doc["spec"]["install"]["spec"]["deployments"][0]["spec"]["template"]["spec"]["containers"][0]["image"]
