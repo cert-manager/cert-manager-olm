@@ -91,19 +91,19 @@ alm_examples:
 - apiVersion: "cert-manager.io/v1"
   kind: "Issuer"
   metadata:
-    name: "test-selfsigned"
+    name: "example-issuer"
   spec:
     selfSigned: {}
 - apiVersion: "cert-manager.io/v1"
   kind: "Certificate"
   metadata:
-    name: "selfsigned-cert"
+    name: "example-certificate"
   spec:
     dnsNames:
     - "example.com"
     issuerRef:
-      name: "test-selfsigned"
-      secretName: "selfsigned-cert-tls"
+      name: "example-issuer"
+    secretName: "example-certificate-tls"
 
 
 # A list of architectures for which there are cert-manager Docker images.
