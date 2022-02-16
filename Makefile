@@ -8,6 +8,8 @@ SHELL := bash
 
 CERT_MANAGER_VERSION ?= 1.6.2
 BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}-rc1
+BUNDLE_CHANNELS ?= candidate
+STABLE_CHANNEL ?= stable
 CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
 
@@ -28,6 +30,10 @@ KUSTOMIZE_VERSION ?= 4.4.0
 KIND_VERSION ?= 0.11.1
 OPERATOR_SDK_VERSION ?= 1.17.0
 OPM_VERSION ?= 1.20.0
+
+comma := ,
+empty :=
+space := $(empty) $(empty)
 
 bin := bin
 os := $(shell go env GOOS)
@@ -101,8 +107,8 @@ ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
 	cd ${bundle_osdk_dir}
 	$(abspath ${kustomize}) build $(abspath ${kustomize_config_dir}) | $(abspath ${operator_sdk}) generate bundle \
 		--verbose \
-		--channels candidate \
-		--default-channel stable \
+		--channels $(subst $(space),$(comma),${BUNDLE_CHANNELS}) \
+		--default-channel=$(filter ${STABLE_CHANNEL},${BUNDLE_CHANNELS}) \
 		--package ${OLM_PACKAGE_NAME} \
 		--version ${BUNDLE_VERSION} \
 		--output-dir .
