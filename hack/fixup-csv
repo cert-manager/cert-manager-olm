@@ -61,6 +61,13 @@ def main():
         conf = yaml.safe_load(config_file)
     doc = yaml.safe_load(sys.stdin)
 
+    # Add displayName for the CRD preview in operatorhub.io.
+    # Ideally operatorhub.io would just use the existing CRD name and
+    # description.
+    # See https://github.com/k8s-operatorhub/operatorhub.io/issues/2
+    for crd in doc["spec"]["customresourcedefinitions"]["owned"]:
+        crd["displayName"] = crd["kind"]
+
     # Add multiarch labels.
     # See https://olm.operatorframework.io/docs/advanced-tasks/ship-operator-supporting-multiarch/
     doc["metadata"].setdefault("labels", {}).update({
