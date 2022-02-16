@@ -179,7 +179,7 @@ metadata:
  name: cert-manager-subscription
  namespace: operators
 spec:
- channel: stable
+ channel: $(firstword ${BUNDLE_CHANNELS})
  name: cert-manager
  source: cert-manager-test-catalog
  sourceNamespace: olm
