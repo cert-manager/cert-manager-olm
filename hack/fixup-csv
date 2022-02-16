@@ -61,6 +61,24 @@ def main():
         conf = yaml.safe_load(config_file)
     doc = yaml.safe_load(sys.stdin)
 
+    internal_objects = conf["internal_objects"]
+
+    # Add displayName for the CRD preview in operatorhub.io.
+    # Add an (Internal) prefix to the kinds that are internal-objects.
+    # Ideally operatorhub.io would just use the existing CRD name and
+    # description.
+    # See https://github.com/k8s-operatorhub/operatorhub.io/issues/2
+    for crd in doc["spec"]["customresourcedefinitions"]["owned"]:
+        kindAndGroup = crd["name"]
+        displayName = crd["kind"]
+        if kindAndGroup in internal_objects:
+            displayName = f"(Internal) {displayName}"
+        crd["displayName"] = displayName
+        kind, group = kindAndGroup.split(".", 1)
+        with open(f"bundle/manifests/{group}_{kind}.yaml") as f:
+            crdContent = yaml.safe_load(f)
+        crd["description"] = crdContent["spec"]["versions"][-1]["schema"]["openAPIV3Schema"]["description"]
+
     # Add multiarch labels.
     # See https://olm.operatorframework.io/docs/advanced-tasks/ship-operator-supporting-multiarch/
     doc["metadata"].setdefault("labels", {}).update({
@@ -68,13 +86,13 @@ def main():
         for arch in conf["architectures"]
     })
 
-    # Hide some internal APIs from the OperatorHub UI
-    # https://docs.okd.io/4.9/operators/operator_sdk/osdk-generating-csvs.html#osdk-hiding-internal-objects_osdk-generating-csvs
+    # Hide some internal APIs from the OperatorHub UI.
+    # See https://docs.okd.io/4.9/operators/operator_sdk/osdk-generating-csvs.html#osdk-hiding-internal-objects_osdk-generating-csvs
+    # Ideally these would be hidden from the WebUI in operatorhub.io, but they
+    # are not.
+    # See https://github.com/k8s-operatorhub/operatorhub.io/issues/14
     doc["metadata"]["annotations"]["operators.operatorframework.io/internal-objects"] = literal(
-        json.dumps([
-            "challenge.acme.cert-manager.io",
-            "order.acme.cert-manager.io",
-        ], indent=4)
+        json.dumps(internal_objects, indent=2)
     )
     doc["metadata"]["annotations"]["capabilities"] = conf["capabilities"]
     doc["metadata"]["annotations"]["categories"] = ",".join(conf["categories"])
