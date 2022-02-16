@@ -6,8 +6,8 @@ SHELL := bash
 .SUFFIXES:
 .ONESHELL:
 
-CERT_MANAGER_VERSION ?= 1.6.1
-BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}
+CERT_MANAGER_VERSION ?= 1.6.2
+BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}-rc1
 CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
 
@@ -101,7 +101,7 @@ ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
 	cd ${bundle_osdk_dir}
 	$(abspath ${kustomize}) build $(abspath ${kustomize_config_dir}) | $(abspath ${operator_sdk}) generate bundle \
 		--verbose \
-		--channels stable \
+		--channels candidate \
 		--default-channel stable \
 		--package ${OLM_PACKAGE_NAME} \
 		--version ${BUNDLE_VERSION} \
