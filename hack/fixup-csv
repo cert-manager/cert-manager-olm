@@ -67,6 +67,9 @@ def main():
     # See https://github.com/k8s-operatorhub/operatorhub.io/issues/2
     for crd in doc["spec"]["customresourcedefinitions"]["owned"]:
         crd["displayName"] = crd["kind"]
+        kind, group = crd["name"].split(".", 1)
+        crdContent = yaml.safe_load(open(f"bundle/manifests/{group}_{kind}.yaml"))
+        crd["description"] = crdContent["spec"]["versions"][-1]["schema"]["openAPIV3Schema"]["description"]
 
     # Add multiarch labels.
     # See https://olm.operatorframework.io/docs/advanced-tasks/ship-operator-supporting-multiarch/
