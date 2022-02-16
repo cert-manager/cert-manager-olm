@@ -68,12 +68,12 @@ metadata:
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.6.1
-    createdAt: '2022-02-16T07:26:24'
+    createdAt: '2022-02-16T09:25:32'
     operators.operatorframework.io/builder: operator-sdk-v1.13.0+git
     operators.operatorframework.io/internal-objects: |-
       [
-          "challenge.acme.cert-manager.io",
-          "order.acme.cert-manager.io"
+        "challenges.acme.cert-manager.io",
+        "orders.acme.cert-manager.io"
       ]
     operators.operatorframework.io/project_layout: unknown
     repository: https://github.com/jetstack/cert-manager
@@ -109,7 +109,7 @@ spec:
       version: v1
     - description: Challenge is a type to represent a Challenge request with an ACME
         server
-      displayName: Challenge
+      displayName: (Internal) Challenge
       kind: Challenge
       name: challenges.acme.cert-manager.io
       version: v1
@@ -129,7 +129,7 @@ spec:
       name: issuers.cert-manager.io
       version: v1
     - description: Order is a type to represent an Order with an ACME server
-      displayName: Order
+      displayName: (Internal) Order
       kind: Order
       name: orders.acme.cert-manager.io
       version: v1

@@ -138,3 +138,9 @@ architectures:
   - arm64
   - ppc64le
   - s390x
+
+# A list of Kind.Group which are considered "internal-objects".
+# See https://docs.okd.io/4.9/operators/operator_sdk/osdk-generating-csvs.html#osdk-hiding-internal-objects_osdk-generating-csvs
+internal_objects:
+  - "challenges.acme.cert-manager.io"
+  - "orders.acme.cert-manager.io"
