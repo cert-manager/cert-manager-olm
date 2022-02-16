@@ -2,41 +2,73 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    alm-examples: |
+    alm-examples: |-
       [
         {
-            "apiVersion": "cert-manager.io/v1",
-            "kind": "Issuer",
-            "metadata": {
-                "name": "test-selfsigned",
-                "namespace": "cert-manager-test"
-            },
-            "spec": {
-                "selfSigned": {}
-            }
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "Issuer",
+          "metadata": {
+            "name": "example-issuer"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
         },
         {
-            "apiVersion": "cert-manager.io/v1",
-            "kind": "Certificate",
-            "metadata": {
-                "name": "selfsigned-cert",
-                "namespace": "cert-manager-test"
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "ClusterIssuer",
+          "metadata": {
+            "name": "example-clusterissuer"
+          },
+          "spec": {
+            "selfSigned": {}
+          }
+        },
+        {
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "Certificate",
+          "metadata": {
+            "name": "example-certificate"
+          },
+          "spec": {
+            "dnsNames": [
+              "example.com"
+            ],
+            "issuerRef": {
+              "name": "example-issuer"
             },
-            "spec": {
-                "dnsNames": [
-                    "example.com"
-                ],
-                "issuerRef": {
-                    "name": "test-selfsigned"
-                },
-                "secretName": "selfsigned-cert-tls"
-            }
+            "secretName": "example-certificate-tls"
+          }
+        },
+        {
+          "apiVersion": "cert-manager.io/v1",
+          "kind": "CertificateRequest",
+          "metadata": {
+            "name": "example-certificaterequest"
+          },
+          "spec": {}
+        },
+        {
+          "apiVersion": "acme.cert-manager.io/v1",
+          "kind": "Order",
+          "metadata": {
+            "name": "example-order"
+          },
+          "spec": {}
+        },
+        {
+          "apiVersion": "acme.cert-manager.io/v1",
+          "kind": "Challenge",
+          "metadata": {
+            "name": "example-challenge"
+          },
+          "spec": {}
         }
       ]
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.6.1
-    createdAt: '2022-02-15T21:48:43'
+    createdAt: '2022-02-15T22:11:24'
     operators.operatorframework.io/builder: operator-sdk-v1.13.0+git
     operators.operatorframework.io/internal-objects: |-
       [

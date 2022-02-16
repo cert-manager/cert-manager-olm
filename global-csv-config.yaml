@@ -87,37 +87,45 @@ maintainers:
 - name: The cert-manager maintainers
   email: cert-manager-maintainers@googlegroups.com
 
-alm_examples: |
-  [
-    {
-        "apiVersion": "cert-manager.io/v1",
-        "kind": "Issuer",
-        "metadata": {
-            "name": "test-selfsigned",
-            "namespace": "cert-manager-test"
-        },
-        "spec": {
-            "selfSigned": {}
-        }
-    },
-    {
-        "apiVersion": "cert-manager.io/v1",
-        "kind": "Certificate",
-        "metadata": {
-            "name": "selfsigned-cert",
-            "namespace": "cert-manager-test"
-        },
-        "spec": {
-            "dnsNames": [
-                "example.com"
-            ],
-            "issuerRef": {
-                "name": "test-selfsigned"
-            },
-            "secretName": "selfsigned-cert-tls"
-        }
-    }
-  ]
+alm_examples:
+- apiVersion: "cert-manager.io/v1"
+  kind: "Issuer"
+  metadata:
+    name: "example-issuer"
+  spec:
+    selfSigned: {}
+- apiVersion: "cert-manager.io/v1"
+  kind: "ClusterIssuer"
+  metadata:
+    name: "example-clusterissuer"
+  spec:
+    selfSigned: {}
+- apiVersion: "cert-manager.io/v1"
+  kind: "Certificate"
+  metadata:
+    name: "example-certificate"
+  spec:
+    dnsNames:
+    - "example.com"
+    issuerRef:
+      name: "example-issuer"
+    secretName: "example-certificate-tls"
+- apiVersion: "cert-manager.io/v1"
+  kind: "CertificateRequest"
+  metadata:
+    name: "example-certificaterequest"
+  spec: {}
+- apiVersion: "acme.cert-manager.io/v1"
+  kind: "Order"
+  metadata:
+    name: "example-order"
+  spec: {}
+- apiVersion: "acme.cert-manager.io/v1"
+  kind: "Challenge"
+  metadata:
+    name: "example-challenge"
+  spec: {}
+
 
 # A list of architectures for which there are cert-manager Docker images.
 # TODO: In future we should add arm (ARCH) and darwin and windows (OS)

@@ -82,7 +82,7 @@ def main():
     doc["metadata"]["annotations"]["createdAt"] = datetime.utcnow().isoformat(timespec="seconds")
     doc["metadata"]["annotations"]["support"] = conf["support"]
     doc["metadata"]["annotations"]["repository"] = conf["repository"]
-    doc["metadata"]["annotations"]["alm-examples"] = literal(conf["alm_examples"])
+    doc["metadata"]["annotations"]["alm-examples"] = literal(json.dumps(conf["alm_examples"], indent=2))
     doc["spec"]["icon"] = [{
         "base64data": logo_b64.decode("ascii"),
         "mediatype": logo_type,
