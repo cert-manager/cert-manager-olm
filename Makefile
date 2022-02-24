@@ -192,7 +192,7 @@ subscription-deploy:
 
 .PHONY: bundle-validate
 bundle-validate: ## Run static checks
-bundle-validate: ${bundle_csv} ${operator_sdk}
+bundle-validate: ${operator_sdk}
 	${operator_sdk} bundle validate ${bundle_dir} --select-optional suite=operatorframework
 
 .PHONY: deploy-olm
