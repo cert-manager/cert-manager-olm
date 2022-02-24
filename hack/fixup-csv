@@ -26,6 +26,7 @@ import mimetypes
 import sys
 from datetime import datetime
 
+import semver
 import yaml
 
 
@@ -60,6 +61,14 @@ def main():
     with open(args.config) as config_file:
         conf = yaml.safe_load(config_file)
     doc = yaml.safe_load(sys.stdin)
+
+    # If this is a patch release, add skiprange so that it is installed in
+    # preference to all previous patch versions (skip patch), even across
+    # channels.
+    # See https://olm.operatorframework.io/docs/concepts/olm-architecture/operator-catalog/creating-an-update-graph/#skiprange
+    v = semver.parse_version_info(doc["spec"]["version"])
+    if v.patch:
+        doc["metadata"]["annotations"]["olm.skipRange"] = f">={v.major}.{v.minor}.0 <{v}"
 
     internal_objects = conf["internal_objects"]
 
