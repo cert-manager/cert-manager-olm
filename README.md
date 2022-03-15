@@ -35,7 +35,46 @@ kubectl operator install cert-manager -c stable -v 1.6.1
 
 ## Release Process
 
+In order to test that OLM can upgrade to the new version you can perform a test release,
+and publish a "release candidate" bundle by creating release candidate PRs to
+[Kubernetes Community Operators Repository][] and to
+[OpenShift Community Operators Repository][].
+
+Once these bundles have been merged, the release candidate version of cert-manager should be available
+in the "candidates" channel __only__.
+
+You can test upgrading to the new version by creating a Subscription targeting the "candidate" channel
+(which should also contain the latest stable version),
+and set the "startingCSV" to the last stable version
+and "installPlanApproval" to "Manual". E.g.
+
+```yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: cert-manager
+  namespace: openshift-operators
+spec:
+  channel: candidate
+  installPlanApproval: Manual
+  name: cert-manager
+  source: community-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: cert-manager.v1.6.1
+```
+
+Then when you have published the release candidate, you should verify that you can upgrade cert-manager to the new version.
+Check the logs and events for upgrade errors during the upgrade.
+
+### Release Steps
+
 * Add the new version to `CERT_MANAGER_VERSION` at the top of the `Makefile`
+* If this is a release candidate:
+  * Add `-rc1` as a suffix to `BUNDLE_VERSION`
+  * Set `BUNDLE_CHANNELS = candidate` (⚠️remove `stable` for release candidates)
+* If this is the final release:
+  * Remove the `-rc1` suffix from `BUNDLE_VERSION`
+  * Set `BUNDLE_CHANNELS = candidate stable` (⚠️add both release channels for final releases)
 * Run `make bundle-build bundle-push catalog-build catalog-push` to generate a bundle and a catalog.
 * Run `make bundle-validate` to check the generated bundle files.
 * `git commit` the bundle changes.
