@@ -6,8 +6,10 @@ SHELL := bash
 .SUFFIXES:
 .ONESHELL:
 
-CERT_MANAGER_VERSION ?= 1.6.1
-BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}
+CERT_MANAGER_VERSION ?= 1.6.2
+BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}-rc1
+BUNDLE_CHANNELS ?= candidate
+STABLE_CHANNEL ?= stable
 CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
 
@@ -28,6 +30,10 @@ KUSTOMIZE_VERSION ?= 4.4.0
 KIND_VERSION ?= 0.11.1
 OPERATOR_SDK_VERSION ?= 1.17.0
 OPM_VERSION ?= 1.20.0
+
+comma := ,
+empty :=
+space := $(empty) $(empty)
 
 bin := bin
 os := $(shell go env GOOS)
@@ -101,8 +107,8 @@ ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
 	cd ${bundle_osdk_dir}
 	$(abspath ${kustomize}) build $(abspath ${kustomize_config_dir}) | $(abspath ${operator_sdk}) generate bundle \
 		--verbose \
-		--channels stable \
-		--default-channel stable \
+		--channels $(subst $(space),$(comma),${BUNDLE_CHANNELS}) \
+		--default-channel=$(filter ${STABLE_CHANNEL},${BUNDLE_CHANNELS}) \
 		--package ${OLM_PACKAGE_NAME} \
 		--version ${BUNDLE_VERSION} \
 		--output-dir .
@@ -173,7 +179,7 @@ metadata:
  name: cert-manager-subscription
  namespace: operators
 spec:
- channel: stable
+ channel: $(firstword ${BUNDLE_CHANNELS})
  name: cert-manager
  source: cert-manager-test-catalog
  sourceNamespace: olm
@@ -186,7 +192,7 @@ subscription-deploy:
 
 .PHONY: bundle-validate
 bundle-validate: ## Run static checks
-bundle-validate: ${bundle_csv} ${operator_sdk}
+bundle-validate: ${operator_sdk}
 	${operator_sdk} bundle validate ${bundle_dir} --select-optional suite=operatorframework
 
 .PHONY: deploy-olm
