@@ -83,9 +83,14 @@ Check the logs and events for upgrade errors during the upgrade.
 * Create a PR on the [Kubernetes Community Operators Repository][],
   adding the new or updated bundle files to `operators/cert-manager/`
   under a sub-directory named after the bundle version
+
+  `make update-community-operators`
+
 * Create a PR on the [OpenShift Community Operators Repository][],
   adding the new or updated bundle files to `operators/cert-manager/`
   under a sub-directory named after the bundle version
+
+  `make update-community-operators-prod`
 
 [Kubernetes Community Operators Repository]: https://github.com/k8s-operatorhub/community-operators
 [OpenShift Community Operators Repository]: https://github.com/redhat-openshift-ecosystem/community-operators-prod
