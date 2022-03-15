@@ -7,8 +7,8 @@ SHELL := bash
 .ONESHELL:
 
 CERT_MANAGER_VERSION ?= 1.6.2
-BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}-rc1
-BUNDLE_CHANNELS ?= candidate
+export BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}
+BUNDLE_CHANNELS ?= candidate stable
 STABLE_CHANNEL ?= stable
 CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
@@ -265,3 +265,19 @@ crc-e2e: crc-instance ${E2E_TEST}
 	gcloud compute ssh crc@${CRC_INSTANCE_NAME} -- rm -f ./e2e
 	gcloud compute scp --compress ${E2E_TEST} crc@${CRC_INSTANCE_NAME}:e2e
 	gcloud compute ssh crc@${CRC_INSTANCE_NAME} -- ./e2e --repo-root=/dev/null --ginkgo.focus="CA\ Issuer" --ginkgo.skip="Gateway"
+
+
+
+.PHONY: update-community-operators
+update-community-operators: export UPSTREAM := k8s-operatorhub
+update-community-operators: export FORK := wallrj
+update-community-operators: export REPO=community-operators
+update-community-operators:
+	./hack/create-community-operators-pr.sh
+
+.PHONY: update-community-operators-prod
+update-community-operators-prod: export UPSTREAM := redhat-openshift-ecosystem
+update-community-operators-prod: export FORK := wallrj
+update-community-operators-prod: export REPO=community-operators-prod
+update-community-operators-prod:
+	./hack/create-community-operators-pr.sh
