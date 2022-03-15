@@ -7,8 +7,8 @@ SHELL := bash
 .ONESHELL:
 
 CERT_MANAGER_VERSION ?= 1.6.2
-BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}-rc1
-BUNDLE_CHANNELS ?= candidate
+BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}
+BUNDLE_CHANNELS ?= candidate stable
 STABLE_CHANNEL ?= stable
 CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
