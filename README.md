@@ -71,10 +71,8 @@ Check the logs and events for upgrade errors during the upgrade.
 * Add the new version to `CERT_MANAGER_VERSION` at the top of the `Makefile`
 * If this is a release candidate:
   * Add `-rc1` as a suffix to `BUNDLE_VERSION`
-  * Set `BUNDLE_CHANNELS = candidate` (⚠️remove `stable` for release candidates)
 * If this is the final release:
   * Remove the `-rc1` suffix from `BUNDLE_VERSION`
-  * Set `BUNDLE_CHANNELS = candidate stable` (⚠️add both release channels for final releases)
 * Run `make bundle-build bundle-push catalog-build catalog-push` to generate a bundle and a catalog.
 * Run `make bundle-validate` to check the generated bundle files.
 * `git commit` the bundle changes.
