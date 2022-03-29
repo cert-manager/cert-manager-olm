@@ -12,6 +12,8 @@ compatible with OLM.
   Retain only the description fields of the stored API version with the exception of descriptions related to podTemplate,
   because those are so verbose and repeated multiple times.
 
+* Add a fake deployment with control-plane: controller-manager to work around: https://github.com/operator-framework/operator-sdk/issues/5574
+
 Usage:
   hack/fixup-cert-manager-manifests  < build/cert-manager-1.4.0.upstream.yaml > build/cert-manager-1.4.0.olm.yaml
 """
@@ -52,6 +54,33 @@ def remove_descriptions_from_non_storage_versions_in_crd(crd):
         crd_versions[i] = remove_descriptions(crd_version, keep=crd_version.get("storage"))
 
 
+FAKE_DEPLOYMENT = """
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller-manager
+  name: unused-deployment
+  namespace: cert-manager
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: unused
+      app.kubernetes.io/instance: cert-manager
+      app.kubernetes.io/name: unused
+  template:
+    metadata:
+      labels:
+        app: cainjector
+        app.kubernetes.io/component: unused
+        app.kubernetes.io/instance: cert-manager
+        app.kubernetes.io/name: unused
+    spec:
+      containers:
+      -  name: manager
+"""
+
 def main():
     """
     Strip duplicate description fields from all supplied CRD files.
@@ -61,6 +90,7 @@ def main():
             remove_descriptions_from_non_storage_versions_in_crd(doc)
         yaml.safe_dump(doc, sys.stdout)
         sys.stdout.write("---\n")
+    sys.stdout.write(FAKE_DEPLOYMENT)
 
 
 if __name__ == "__main__":

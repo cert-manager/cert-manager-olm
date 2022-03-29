@@ -131,11 +131,20 @@ def main():
     for webhook in doc["spec"]["webhookdefinitions"]:
         webhook["generateName"] = prefixes[webhook["type"]] + "." + "webhooks.cert-manager.io"
 
+
+    # Remove the deployment added earlier in fixup-cert-manager-manifests to
+    # work around:
+    # https://github.com/operator-framework/operator-sdk/issues/5574
+    deployments = doc["spec"]["install"]["spec"]["deployments"]
+    for i, deployment in enumerate(deployments):
+        if deployment["name"] == "unused-deployment":
+            del deployments[i]
+
     # Workaround for OLM configuring all the webhook DNS names with a `-service` suffix.
     # See:
     # https://github.com/operator-framework/operator-lifecycle-manager/blob/15790a8a2f07fe65a3dbf5a45a54d35e20f2cce9/pkg/controller/install/webhook.go#L254
     # https://github.com/operator-framework/api/blob/b51286920978aa99422358a3db74392437eaadf0/pkg/operators/v1alpha1/clusterserviceversion_types.go#L207
-    for deployment in doc["spec"]["install"]["spec"]["deployments"]:
+    for deployment in deployments:
         # [0]["spec"]["template"]["spec"]["containers"][0]["image"]
         if deployment["name"] != "cert-manager-webhook":
             continue
