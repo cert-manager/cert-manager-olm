@@ -26,10 +26,10 @@ CATALOG_IMG ?= ${IMG_BASE}-olm-catalogue:${CATALOG_VERSION}
 E2E_CLUSTER_NAME ?= cert-manager-olm
 CERT_MANAGER_LOGO_URL ?= https://github.com/cert-manager/website/raw/3998bef91af7266c69f051a2f879be45eb0b3bbb/static/favicons/favicon-256.png
 
-KUSTOMIZE_VERSION ?= 4.4.0
-KIND_VERSION ?= 0.11.1
-OPERATOR_SDK_VERSION ?= 1.20.0
-OPM_VERSION ?= 1.20.0
+KUSTOMIZE_VERSION ?= 4.5.6
+KIND_VERSION ?= 0.14.0
+OPERATOR_SDK_VERSION ?= 1.22.2
+OPM_VERSION ?= 1.24.0
 
 comma := ,
 empty :=
