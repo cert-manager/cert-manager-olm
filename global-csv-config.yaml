@@ -65,7 +65,7 @@ support: The cert-manager maintainers
 
 repository: https://github.com/jetstack/cert-manager
 
-min_kubernetes_version: 1.16.0
+min_kubernetes_version: 1.19.0-0
 
 keywords:
 - TLS
