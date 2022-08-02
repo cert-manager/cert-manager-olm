@@ -68,8 +68,8 @@ metadata:
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.9.1
-    createdAt: '2022-08-02T12:56:12'
-    olm.skipRange: '>=1.9.0 <1.9.1-rc1'
+    createdAt: '2022-08-02T17:04:56'
+    olm.skipRange: '>=1.9.0 <1.9.1'
     operators.operatorframework.io/builder: operator-sdk-v1.22.2
     operators.operatorframework.io/internal-objects: |-
       [
@@ -84,7 +84,7 @@ metadata:
     operatorframework.io/arch.arm64: supported
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
-  name: cert-manager.v1.9.1-rc1
+  name: cert-manager.v1.9.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -868,7 +868,7 @@ spec:
   provider:
     name: The cert-manager maintainers
     url: https://cert-manager.io/
-  version: 1.9.1-rc1
+  version: 1.9.1
   webhookdefinitions:
   - admissionReviewVersions:
     - v1
