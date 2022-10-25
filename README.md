@@ -23,15 +23,7 @@ OLM will then install the newest cert-manager bundle in that release channel and
 
 ## Installing
 
-The simplest way to install cert-manager via OLM is to use the `kubectl operator` plugin, as follows:
-
-```sh
-kubectl krew install operator
-kubectl operator list-available
-kubectl operator install cert-manager -c stable -v 1.6.1
-```
-
-[kubectl operator plugin]: https://github.com/operator-framework/kubectl-operator
+📖 Read the [Operator Lifecycle Manager installation documentation for cert-manager](https://cert-manager.io/docs/installation/operator-lifecycle-manager/).
 
 ## Release Process
 
