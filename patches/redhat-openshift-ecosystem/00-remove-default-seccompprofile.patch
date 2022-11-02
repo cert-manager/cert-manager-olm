@@ -1,0 +1,44 @@
+Remove seccompprofile for RedHat OpenShift OLM bundles for compatibility with OpenShift < 4.11
+
+TODO(wallrj): Remove this patch when we drop support for OpenShift 4.10.
+
+Here is the reason for this patch:
+> Note that while K8S restricted requires workloads to set
+> seccompProfile=runtime/default, in OCP 4.10 and earlier, setting the
+> seccompProfile explicitly disqualified the workload from the restricted SCC.
+> To be compatible with 4.10 and 4.11, the seccompProfile value must be left
+> unset(the SCC itself will default it to runtime/default so it is ok to leave
+> it empty).
+https://github.com/redhat-openshift-ecosystem/community-operators-prod/discussions/1417
+
+diff --git a/bundle/manifests/cert-manager.clusterserviceversion.yaml b/bundle/manifests/cert-manager.clusterserviceversion.yaml
+index fa370e3..bc8d491 100644
+--- a/bundle/manifests/cert-manager.clusterserviceversion.yaml
++++ b/bundle/manifests/cert-manager.clusterserviceversion.yaml
+@@ -667,8 +667,6 @@ spec:
+                 kubernetes.io/os: linux
+               securityContext:
+                 runAsNonRoot: true
+-                seccompProfile:
+-                  type: RuntimeDefault
+               serviceAccountName: cert-manager
+       - label:
+           app: cainjector
+@@ -716,8 +714,6 @@ spec:
+                 kubernetes.io/os: linux
+               securityContext:
+                 runAsNonRoot: true
+-                seccompProfile:
+-                  type: RuntimeDefault
+               serviceAccountName: cert-manager-cainjector
+       - label:
+           app: webhook
+@@ -797,8 +793,6 @@ spec:
+                 kubernetes.io/os: linux
+               securityContext:
+                 runAsNonRoot: true
+-                seccompProfile:
+-                  type: RuntimeDefault
+               serviceAccountName: cert-manager-webhook
+       permissions:
+       - rules:

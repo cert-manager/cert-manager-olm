@@ -67,9 +67,8 @@ metadata:
       ]
     capabilities: Full Lifecycle
     categories: Security
-    containerImage: quay.io/jetstack/cert-manager-controller:v1.9.1
-    createdAt: '2022-10-25T08:43:13'
-    olm.skipRange: '>=1.9.0 <1.9.1'
+    containerImage: quay.io/jetstack/cert-manager-controller:v1.10.0
+    createdAt: '2022-10-25T11:34:17'
     operators.operatorframework.io/builder: operator-sdk-v1.25.0
     operators.operatorframework.io/internal-objects: |-
       [
@@ -84,7 +83,7 @@ metadata:
     operatorframework.io/arch.arm64: supported
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
-  name: cert-manager.v1.9.1
+  name: cert-manager.v1.10.0-rc1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -618,7 +617,7 @@ spec:
           app.kubernetes.io/component: controller
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: cert-manager
-          app.kubernetes.io/version: v1.9.1
+          app.kubernetes.io/version: v1.10.0
         name: cert-manager
         spec:
           replicas: 1
@@ -639,7 +638,7 @@ spec:
                 app.kubernetes.io/component: controller
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: cert-manager
-                app.kubernetes.io/version: v1.9.1
+                app.kubernetes.io/version: v1.10.0
             spec:
               containers:
               - args:
@@ -651,9 +650,9 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-controller:v1.9.1
+                image: quay.io/jetstack/cert-manager-controller:v1.10.0
                 imagePullPolicy: IfNotPresent
-                name: cert-manager
+                name: cert-manager-controller
                 ports:
                 - containerPort: 9402
                   name: http-metrics
@@ -661,17 +660,22 @@ spec:
                 resources: {}
                 securityContext:
                   allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
               nodeSelector:
                 kubernetes.io/os: linux
               securityContext:
                 runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
               serviceAccountName: cert-manager
       - label:
           app: cainjector
           app.kubernetes.io/component: cainjector
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: cainjector
-          app.kubernetes.io/version: v1.9.1
+          app.kubernetes.io/version: v1.10.0
         name: cert-manager-cainjector
         spec:
           replicas: 1
@@ -688,7 +692,7 @@ spec:
                 app.kubernetes.io/component: cainjector
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: cainjector
-                app.kubernetes.io/version: v1.9.1
+                app.kubernetes.io/version: v1.10.0
             spec:
               containers:
               - args:
@@ -699,23 +703,28 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-cainjector:v1.9.1
+                image: quay.io/jetstack/cert-manager-cainjector:v1.10.0
                 imagePullPolicy: IfNotPresent
-                name: cert-manager
+                name: cert-manager-cainjector
                 resources: {}
                 securityContext:
                   allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
               nodeSelector:
                 kubernetes.io/os: linux
               securityContext:
                 runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
               serviceAccountName: cert-manager-cainjector
       - label:
           app: webhook
           app.kubernetes.io/component: webhook
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: webhook
-          app.kubernetes.io/version: v1.9.1
+          app.kubernetes.io/version: v1.10.0
         name: cert-manager-webhook
         spec:
           replicas: 1
@@ -732,7 +741,7 @@ spec:
                 app.kubernetes.io/component: webhook
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: webhook
-                app.kubernetes.io/version: v1.9.1
+                app.kubernetes.io/version: v1.10.0
             spec:
               containers:
               - args:
@@ -740,15 +749,15 @@ spec:
                 - --secure-port=10250
                 - --dynamic-serving-ca-secret-namespace=$(POD_NAMESPACE)
                 - --dynamic-serving-ca-secret-name=cert-manager-webhook-ca
-                - --dynamic-serving-dns-names=cert-manager-webhook-service.$(POD_NAMESPACE).svc
-                - --tls-cert-file=/apiserver.local.config/certificates/apiserver.crt
-                - --tls-private-key-file=/apiserver.local.config/certificates/apiserver.key
+                - --dynamic-serving-dns-names=cert-manager-webhook
+                - --dynamic-serving-dns-names=cert-manager-webhook.$(POD_NAMESPACE)
+                - --dynamic-serving-dns-names=cert-manager-webhook.$(POD_NAMESPACE).svc
                 env:
                 - name: POD_NAMESPACE
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-webhook:v1.9.1
+                image: quay.io/jetstack/cert-manager-webhook:v1.10.0
                 imagePullPolicy: IfNotPresent
                 livenessProbe:
                   failureThreshold: 3
@@ -760,10 +769,13 @@ spec:
                   periodSeconds: 10
                   successThreshold: 1
                   timeoutSeconds: 1
-                name: cert-manager
+                name: cert-manager-webhook
                 ports:
                 - containerPort: 10250
                   name: https
+                  protocol: TCP
+                - containerPort: 6080
+                  name: healthcheck
                   protocol: TCP
                 readinessProbe:
                   failureThreshold: 3
@@ -778,10 +790,15 @@ spec:
                 resources: {}
                 securityContext:
                   allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
               nodeSelector:
                 kubernetes.io/os: linux
               securityContext:
                 runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
               serviceAccountName: cert-manager-webhook
       permissions:
       - rules:
@@ -868,7 +885,7 @@ spec:
   provider:
     name: The cert-manager maintainers
     url: https://cert-manager.io/
-  version: 1.9.1
+  version: 1.10.0-rc1
   webhookdefinitions:
   - admissionReviewVersions:
     - v1
