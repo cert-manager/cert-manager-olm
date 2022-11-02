@@ -19,6 +19,8 @@ set -o pipefail
 : ${FORK?}
 : ${REPO?}
 
+repo_root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" > /dev/null && pwd )"
+
 # Clone the repo
 test -d "build/operatorhub-repos/${REPO}/.git" || \
     git clone "git@github.com:${FORK}/${REPO}.git" "build/operatorhub-repos/${REPO}" \
@@ -40,6 +42,14 @@ git checkout -B "cert-manager-${BUNDLE_VERSION}" upstream/main
 # Copy all the files to the workspace
 rm -rf "operators/cert-manager/${BUNDLE_VERSION}"
 cp -a ../../../bundle "operators/cert-manager/${BUNDLE_VERSION}"
+
+# Apply patches with operatorhub.io or OpenShift OperatorHub package specific
+# modifications. E.g. Remove securityContext.seccompProfile OpenShift packages.
+pushd "operators/cert-manager/${BUNDLE_VERSION}"
+find "${repo_root}/patches/${UPSTREAM}" -type f -name "*.patch" | while read patch_file; do
+    patch -p 2 < ${patch_file}
+done
+popd
 
 # Commit the files
 git add "operators/cert-manager/${BUNDLE_VERSION}"
