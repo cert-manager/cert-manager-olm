@@ -7,7 +7,7 @@ SHELL := bash
 .ONESHELL:
 
 CERT_MANAGER_VERSION ?= 1.10.0
-export BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}-rc1
+export BUNDLE_VERSION ?= ${CERT_MANAGER_VERSION}
 BUNDLE_CHANNELS ?= $(strip candidate $(if $(subst ${CERT_MANAGER_VERSION},${empty},${BUNDLE_VERSION}),,stable))
 STABLE_CHANNEL ?= stable
 CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
