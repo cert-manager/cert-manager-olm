@@ -160,6 +160,9 @@ def main():
                 "--tls-private-key-file=/apiserver.local.config/certificates/apiserver.key",
             ])
             container["args"] = args
+            break
+        else:
+            raise Exception("webhook container not found")
 
     yaml.dump(doc, sys.stdout)
 
