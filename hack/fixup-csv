@@ -140,7 +140,7 @@ def main():
         if deployment["name"] != "cert-manager-webhook":
             continue
         for container in deployment["spec"]["template"]["spec"]["containers"]:
-            if container["name"] != "cert-manager":
+            if container["name"] != "cert-manager-webhook":
                 continue
             # Filter out the arguments we're about to change
             args = [
