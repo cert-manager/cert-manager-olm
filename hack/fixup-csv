@@ -140,7 +140,7 @@ def main():
         if deployment["name"] != "cert-manager-webhook":
             continue
         for container in deployment["spec"]["template"]["spec"]["containers"]:
-            if container["name"] != "cert-manager":
+            if container["name"] != "cert-manager-webhook":
                 continue
             # Filter out the arguments we're about to change
             args = [
@@ -160,6 +160,9 @@ def main():
                 "--tls-private-key-file=/apiserver.local.config/certificates/apiserver.key",
             ])
             container["args"] = args
+            break
+        else:
+            raise Exception("webhook container not found")
 
     yaml.dump(doc, sys.stdout)
 
