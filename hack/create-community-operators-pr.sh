@@ -43,15 +43,23 @@ git checkout -B "cert-manager-${BUNDLE_VERSION}" upstream/main
 rm -rf "operators/cert-manager/${BUNDLE_VERSION}"
 cp -a ../../../bundle "operators/cert-manager/${BUNDLE_VERSION}"
 
+# Commit the unpatched files
+git add "operators/cert-manager/${BUNDLE_VERSION}"
+
 # Apply patches with operatorhub.io or OpenShift OperatorHub package specific
 # modifications. E.g. Remove securityContext.seccompProfile OpenShift packages.
+# Avoid creating backup files which, if committed to the repo cause the
+# operatorhub bundle checks to fail
 pushd "operators/cert-manager/${BUNDLE_VERSION}"
 find "${repo_root}/patches/${UPSTREAM}" -type f -name "*.patch" | while read patch_file; do
-    patch -p 2 < ${patch_file}
+    patch --no-backup-if-mismatch --version-control=never -p 2 < ${patch_file}
 done
 popd
 
-# Commit the files
+# Display the patch
+git diff
+
+# Commit the patched files
 git add "operators/cert-manager/${BUNDLE_VERSION}"
 git commit --message "Release cert-manager-${BUNDLE_VERSION}" --signoff
 
