@@ -207,7 +207,7 @@ First compile the cert-manager E2E test binary as follows:
 
 ```sh
 cd projects/cert-manager/cert-manager
-bazel build //test/e2e:e2e
+make e2e-build
 ```
 
 And then upload the binary to the remote VM and run them against cert-manager installed in the crc OpenShift cluster:
@@ -215,9 +215,8 @@ And then upload the binary to the remote VM and run them against cert-manager in
 ```sh
 cd projects/cert-manager/cert-manager-olm
 make crc-e2e \
-  OPENSHIFT_VERSION=4.8 \
-  PULL_SECRET=~/Downloads/pull-secret \
-  E2E_TEST=../cert-manager/bazel-bin/test/e2e/e2e.test
+  OPENSHIFT_VERSION=4.X \
+  E2E_TEST=../cert-manager/_bin/test/e2e.test
 ```
 
 ### Manual Creation of a `crc` VM

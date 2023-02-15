@@ -266,7 +266,7 @@ E2E_TEST ?=
 
 .PHONY: crc-e2e
 crc-e2e: ## Run cert-manager E2E tests on the crc-instance
-crc-e2e: crc-instance ${E2E_TEST}
+crc-e2e: ${E2E_TEST}
 	: $${E2E_TEST:?"Please set E2E_TEST to the path to the cert-manager E2E test binary"}
 	gcloud compute ssh crc@${CRC_INSTANCE_NAME} -- rm -f ./e2e
 	gcloud compute scp --compress ${E2E_TEST} crc@${CRC_INSTANCE_NAME}:e2e
