@@ -63,7 +63,7 @@ categories:
 
 support: The cert-manager maintainers
 
-repository: https://github.com/jetstack/cert-manager
+repository: https://github.com/cert-manager/cert-manager
 
 min_kubernetes_version: 1.19.0-0
 
