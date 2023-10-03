@@ -68,7 +68,7 @@ metadata:
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.12.2
-    createdAt: '2023-06-27T16:49:13'
+    createdAt: '2023-10-03T13:18:40'
     olm.skipRange: '>=1.12.0 <1.12.2'
     operators.operatorframework.io/builder: operator-sdk-v1.25.0
     operators.operatorframework.io/internal-objects: |-
@@ -77,7 +77,7 @@ metadata:
         "orders.acme.cert-manager.io"
       ]
     operators.operatorframework.io/project_layout: unknown
-    repository: https://github.com/jetstack/cert-manager
+    repository: https://github.com/cert-manager/cert-manager
     support: The cert-manager maintainers
   labels:
     operatorframework.io/arch.amd64: supported
