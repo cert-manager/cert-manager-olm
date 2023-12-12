@@ -156,7 +156,7 @@ which is more than is available on most laptops.
 Download your pull secret from the [crc-download] page and supply the path in the command line below:
 
 ```sh
-make crc-instance OPENSHIFT_VERSION=4.9 PULL_SECRET=${HOME}/Downloads/pull-secret
+make crc-instance OPENSHIFT_VERSION=4.13 PULL_SECRET=${HOME}/Downloads/pull-secret
 ```
 
 This will create a VM and automatically install the chosen version of OpenShift, using a suitable version of `crc`.
