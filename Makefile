@@ -270,7 +270,7 @@ crc-e2e: ${E2E_TEST}
 	: $${E2E_TEST:?"Please set E2E_TEST to the path to the cert-manager E2E test binary"}
 	gcloud compute ssh crc@${CRC_INSTANCE_NAME} -- rm -f ./e2e
 	gcloud compute scp --compress ${E2E_TEST} crc@${CRC_INSTANCE_NAME}:e2e
-	gcloud compute ssh crc@${CRC_INSTANCE_NAME} -- ./e2e --repo-root=/dev/null --ginkgo.focus="CA\ Issuer" --ginkgo.skip="Gateway"
+	gcloud compute ssh crc@${CRC_INSTANCE_NAME} -- E2E_OPENSHIFT=true ./e2e --repo-root=/dev/null --ginkgo.focus="Vault\ Issuer" --ginkgo.skip="Gateway"
 
 
 
