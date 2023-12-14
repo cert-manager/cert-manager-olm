@@ -156,7 +156,7 @@ which is more than is available on most laptops.
 Download your pull secret from the [crc-download] page and supply the path in the command line below:
 
 ```sh
-make crc-instance OPENSHIFT_VERSION=4.9 PULL_SECRET=${HOME}/Downloads/pull-secret
+make crc-instance OPENSHIFT_VERSION=4.13 PULL_SECRET=${HOME}/Downloads/pull-secret
 ```
 
 This will create a VM and automatically install the chosen version of OpenShift, using a suitable version of `crc`.
@@ -164,15 +164,15 @@ The `crc` installation, setup and start are performed by a `startup-script` whic
 You can monitor the progress of the script as follows:
 
 ```sh
-gcloud compute instances tail-serial-port-output crc-4-9
+gcloud compute instances tail-serial-port-output crc-4-13
 ```
 
 You can log in to the VM and interact with the cluster as follows:
 
 ```sh
-gcloud compute ssh crc@crc-4-9 -- -D 8080
+gcloud compute ssh crc@crc-4-13 -- -D 8080
 sudo journalctl -u google-startup-scripts.service  --output cat
-eval $(bin/crc-1.34.0 oc-env)
+eval $(bin/crc-2.28.0 oc-env)
 oc get pods -A
 ```
 
@@ -180,7 +180,7 @@ oc get pods -A
 
 Log in to the VM using SSH and enable socks proxy forwarding so that you will be able to connect to the Web UI of `crc` when it starts.
 ```
-gcloud compute ssh crc@crc-4-9 -- -D 8080
+gcloud compute ssh crc@crc-4-13 -- -D 8080
 ```
 
 Now configure your web browser to use the socks5 proxy at `localhost:8080`.
@@ -215,7 +215,7 @@ And then upload the binary to the remote VM and run them against cert-manager in
 ```sh
 cd projects/cert-manager/cert-manager-olm
 make crc-e2e \
-  OPENSHIFT_VERSION=4.X \
+  OPENSHIFT_VERSION=4.13 \
   E2E_TEST=../cert-manager/_bin/test/e2e.test
 ```
 

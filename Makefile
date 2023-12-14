@@ -6,11 +6,11 @@ SHELL := bash
 .SUFFIXES:
 .ONESHELL:
 
-CERT_MANAGER_VERSION ?= 1.13.1
+CERT_MANAGER_VERSION ?= 1.13.3
 # Decoupled the BUNDLE_VERSION from the CERT_MANAGER_VERSION so that I can do a
 # patch release containing the fix for:
 # https://github.com/cert-manager/cert-manager/issues/5551
-export BUNDLE_VERSION ?= 1.13.1
+export BUNDLE_VERSION ?= 1.13.3
 # DO NOT PUBLISH PRE-RELEASES TO THE STABLE CHANNEL!
 # For stable releases use: `candidate stable`.
 # For pre-releases use: `candidate`.
