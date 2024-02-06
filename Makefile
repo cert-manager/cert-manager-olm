@@ -216,7 +216,7 @@ kind-cluster: ${kind}
 
 .PHONY: bundle-test
 bundle-test: ## Build bundles and test locally as described at https://operator-framework.github.io/community-operators/testing-operators/
-bundle-test: catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
+bundle-test: bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
 
 .PHONY: clean-kind-cluster
 clean-kind-cluster: ${kind}
