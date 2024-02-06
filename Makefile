@@ -25,7 +25,8 @@ help: ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 OLM_PACKAGE_NAME ?= cert-manager
-IMG_BASE ?= gcr.io/jetstack-richard/cert-manager
+IMG_BASE_DEFAULT := ttl.sh/$(shell uuidgen)/cert-manager
+IMG_BASE ?= $(IMG_BASE_DEFAULT)
 BUNDLE_IMG_BASE ?= ${IMG_BASE}-olm-bundle
 BUNDLE_IMG ?= ${BUNDLE_IMG_BASE}:${BUNDLE_VERSION}
 CATALOG_IMG ?= ${IMG_BASE}-olm-catalogue:${CATALOG_VERSION}
