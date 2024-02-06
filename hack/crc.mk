@@ -40,6 +40,7 @@ crc_version_4.10 := 2.6.0
 crc_version_4.11 := 2.12.0
 crc_version_4.12 := 2.19.0
 crc_version_4.13 := 2.28.0
+crc_version_4.14 := 2.32.0
 crc_version = ${crc_version_${OPENSHIFT_VERSION}}
 
 # Download the crc tarball
