@@ -33,7 +33,7 @@ E2E_CLUSTER_NAME ?= cert-manager-olm
 CERT_MANAGER_LOGO_URL ?= https://github.com/cert-manager/website/raw/3998bef91af7266c69f051a2f879be45eb0b3bbb/static/favicons/favicon-256.png
 
 KUSTOMIZE_VERSION ?= 5.3.0
-KIND_VERSION ?= 0.16.0
+KIND_VERSION ?= 0.21.0
 OPERATOR_SDK_VERSION ?= 1.33.0
 OPM_VERSION ?= 1.36.0
 
