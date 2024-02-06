@@ -35,7 +35,7 @@ CERT_MANAGER_LOGO_URL ?= https://github.com/cert-manager/website/raw/3998bef91af
 KUSTOMIZE_VERSION ?= 4.5.7
 KIND_VERSION ?= 0.16.0
 OPERATOR_SDK_VERSION ?= 1.33.0
-OPM_VERSION ?= 1.26.2
+OPM_VERSION ?= 1.36.0
 
 comma := ,
 empty :=
