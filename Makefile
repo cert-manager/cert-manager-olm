@@ -169,6 +169,8 @@ metadata:
 spec:
  sourceType: grpc
  image: ${CATALOG_IMG}
+ grpcPodConfig:
+  securityContextConfig: restricted
 ---
 endef
 
