@@ -50,12 +50,19 @@ kustomize = ${bin}/kustomize-${KUSTOMIZE_VERSION}
 kind = ${bin}/kind-${KIND_VERSION}
 operator_sdk = ${bin}/operator-sdk-${OPERATOR_SDK_VERSION}
 opm = ${bin}/opm-${OPM_VERSION}
+cmctl = ${bin}/cmctl-${CERT_MANAGER_VERSION}
 
 ${kustomize}: url := https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${os}_${arch}.tar.gz
 ${kustomize}:
 	mkdir -p $(dir $@)
 	curl -sSL ${url} | tar --directory $(dir $@) -xzf - kustomize
 	mv $(dir $@)/kustomize $@
+
+${cmctl}: url := https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cmctl-$(os)-$(arch).tar.gz
+${cmctl}:
+	mkdir -p $(dir $@)
+	curl -fsSL ${url} | tar --directory $(dir $@) -xzf - cmctl
+	mv $(dir $@)cmctl $@
 
 ${kind}: url := https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-${os}-${arch}
 ${operator_sdk}: url := https://github.com/operator-framework/operator-sdk/releases/download/v${OPERATOR_SDK_VERSION}/operator-sdk_${os}_${arch}
@@ -214,9 +221,20 @@ kind-cluster: ## Use Kind to create a Kubernetes cluster for E2E tests
 kind-cluster: ${kind}
 	 ${kind} get clusters | grep ${E2E_CLUSTER_NAME} || ${kind} create cluster --name ${E2E_CLUSTER_NAME}
 
+# Give a sense of progress by streaming all the events until the ClusterServiceVersion has been installed,
+# then check the cert-manager API.
+#
+# Also works around a bug in `cmctl check api`, where it will return success if
+# the CRDs are installed but the webhook has not been configured. See
+# https://github.com/cert-manager/cert-manager/issues/6721
+#
+# Use process substitution instead of pipe, otherwise kubectl get --watch may hang. See
+# https://stackoverflow.com/a/53382807
 .PHONY: bundle-test
 bundle-test: ## Build bundles and test locally as described at https://operator-framework.github.io/community-operators/testing-operators/
-bundle-test: bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
+bundle-test: $(cmctl) bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
+	sed '/install strategy completed/q' < <(kubectl get events --namespace operators --watch)
+	$(cmctl) check api --wait=5m -v
 
 .PHONY: clean-kind-cluster
 clean-kind-cluster: ${kind}
