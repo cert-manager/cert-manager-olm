@@ -227,7 +227,7 @@ kind-cluster: ${kind}
 	 ${kind} get clusters | grep ${E2E_CLUSTER_NAME} || ${kind} create cluster --name ${E2E_CLUSTER_NAME}
 
 # Give a sense of progress by streaming all the events until the ClusterServiceVersion has been installed,
-# then check the cert-manager API.
+# then check the cert-manager API and print the detected cert-manager version.
 #
 # Also works around a bug in `cmctl check api`, where it will return success if
 # the CRDs are installed but the webhook has not been configured. See
@@ -240,6 +240,7 @@ bundle-test: ## Build bundles and test locally as described at https://operator-
 bundle-test: $(cmctl) bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
 	sed '/install strategy completed/q' < <(kubectl get events --namespace operators --watch)
 	$(cmctl) check api --wait=5m -v
+	$(cmctl) version -o yaml
 
 .PHONY: clean-kind-cluster
 clean-kind-cluster: ${kind}
