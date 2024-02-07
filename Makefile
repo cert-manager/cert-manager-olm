@@ -238,7 +238,7 @@ kind-cluster: ${kind}
 .PHONY: bundle-test
 bundle-test: ## Build bundles and test locally as described at https://operator-framework.github.io/community-operators/testing-operators/
 bundle-test: $(cmctl) bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
-	sed '/install strategy completed/q' < <(kubectl get events --namespace operators --watch)
+	timeout 5m sed '/install strategy completed/q' < <(kubectl get events --namespace operators --watch)
 	$(cmctl) check api --wait=5m -v
 	$(cmctl) version -o yaml
 
