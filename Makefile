@@ -146,9 +146,22 @@ ${bundle_csv}: ${bundle_osdk_csv} ${fixup_csv} ${cert_manager_logo} ${bundle_csv
 		--config ${bundle_csv_global_config} \
 		< ${bundle_osdk_csv} > $@
 
+# Update the `bundle/` directory.
+#
+# The `metadata/annotations.yaml` file is modified to set minimum supported
+# OpenShift version to v4.6, which ensures that cert-manager will be included in
+# the community-operator catalogs for all versions of OpenShift >= v4.6
+# (OpenShift 4.6 = Kubernetes 1.19).
+#
+# This is also to comply with the static-tests in the community-operators-prod
+# repository. See:
+# * https://redhat-connect.gitbook.io/certified-operator-guide/ocp-deployment/operator-metadata/bundle-directory/managing-openshift-versions
+# * https://redhat-openshift-ecosystem.github.io/community-operators-prod/packaging-required-criteria-ocp/#configure-the-openshift-distribution
+# * https://github.com/redhat-openshift-ecosystem/operator-pipelines/pull/562
 .PHONY: bundle-generate
 bundle-generate: ## Create / update the OLM bundle files
 bundle-generate: ${bundle_csv}
+	yq -i '.annotations."com.redhat.openshift.versions"="v4.6"' $(bundle_dir)/metadata/annotations.yaml
 
 .PHONY: bundle-build
 bundle-build: ## Create a cert-manager OLM bundle image
