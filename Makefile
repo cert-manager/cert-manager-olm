@@ -16,7 +16,8 @@ export BUNDLE_VERSION ?= 1.13.3
 # For pre-releases use: `candidate`.
 BUNDLE_CHANNELS ?= candidate stable
 STABLE_CHANNEL ?= stable
-CATALOG_VERSION ?= $(shell git describe --tags --always --dirty)
+CATALOG_VERSION_DEFAULT := $(shell git describe --tags --always --dirty)
+CATALOG_VERSION ?= $(CATALOG_VERSION_DEFAULT)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
 
 # from https://suva.sh/posts/well-documented-makefiles/
