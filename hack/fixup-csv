@@ -131,6 +131,9 @@ def main():
     for webhook in doc["spec"]["webhookdefinitions"]:
         webhook["generateName"] = prefixes[webhook["type"]] + "." + "webhooks.cert-manager.io"
 
+    # Remove all default the --dynamic-serving- flags of the webhook deployment,
+    # because that isn't used in the OLM package.
+    # Instead OLM creates the key and cert which is mounted into the webhook Pod.
     # Workaround for OLM configuring all the webhook DNS names with a `-service` suffix.
     # See:
     # https://github.com/operator-framework/operator-lifecycle-manager/blob/15790a8a2f07fe65a3dbf5a45a54d35e20f2cce9/pkg/controller/install/webhook.go#L254
@@ -146,14 +149,13 @@ def main():
             args = [
                 a for a in container["args"]
                 if not a.startswith((
-                        "--dynamic-serving-dns-names",
+                        "--dynamic-serving-",
                         "--tls-cert-file",
                         "--tls-private-key-file",
                 ))
             ]
             # Add the arguments back with the modified values
             args.extend([
-                "--dynamic-serving-dns-names=cert-manager-webhook-service.$(POD_NAMESPACE).svc",
                 # Use certificate paths that are compatible with OpenShift 4.6:
                 # https://olm.operatorframework.io/docs/advanced-tasks/adding-admission-and-conversion-webhooks/#certificate-authority-requirements
                 "--tls-cert-file=/apiserver.local.config/certificates/apiserver.crt",
