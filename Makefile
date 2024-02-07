@@ -146,7 +146,7 @@ bundle-generate: ${bundle_csv}
 
 .PHONY: bundle-build
 bundle-build: ## Create a cert-manager OLM bundle image
-bundle-build: ${bundle_csv} ${bundle_dockerfile}
+bundle-build:
 	docker build -f ${bundle_dockerfile} -t ${BUNDLE_IMG} ${bundle_dir}
 
 .PHONY: bundle-push
