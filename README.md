@@ -88,54 +88,31 @@ Check the logs and events for upgrade errors during the upgrade.
 
 ## Testing
 
-The bundle Docker image and a temporary catalog Docker image can be built and pushed to a personal Docker registry.
+The bundle Docker image and a temporary catalog Docker image can be built and pushed to a temporary Docker registry.
 These can then be used by OLM running on a Kubernetes cluster.
 Run `make bundle-test` to create the bundle and catalog then deploy them with OLM, installed on a local Kind cluster, for testing.
+The test will wait for cert-manager to be installed and then print the version using `cmctl version`.
 
-```
+```sh
 make bundle-test
-```
-
-Wait for the CSV to be created:
-
-```
-$ kubectl -n operators get clusterserviceversion -o wide
-NAME                  DISPLAY        VERSION   REPLACES   PHASE
-cert-manager.v1.3.1   cert-manager   1.3.1                Installing
-```
-
-Monitor events as OLM installs cert-manager 1.3.1
-
-```
-$ kubectl -n operators get events -w
-LAST SEEN   TYPE     REASON                OBJECT                                      MESSAGE
-0s          Normal   RequirementsUnknown   clusterserviceversion/cert-manager.v1.3.1   requirements not yet checked
-0s          Normal   RequirementsNotMet    clusterserviceversion/cert-manager.v1.3.1   one or more requirements couldn't be found
-0s          Normal   AllRequirementsMet    clusterserviceversion/cert-manager.v1.3.1   all requirements found, attempting install
-0s          Normal   AllRequirementsMet    clusterserviceversion/cert-manager.v1.3.1   all requirements found, attempting install
-0s          Normal   ScalingReplicaSet     deployment/cert-manager                     Scaled up replica set cert-manager-74d7f9dff to 1
-0s          Normal   SuccessfulCreate      replicaset/cert-manager-74d7f9dff           Created pod: cert-manager-74d7f9dff-72g4t
-0s          Normal   Scheduled             pod/cert-manager-74d7f9dff-72g4t            Successfully assigned operators/cert-manager-74d7f9dff-72g4t to cert-manager-olm-control-plane
-0s          Normal   Pulling               pod/cert-manager-74d7f9dff-72g4t            Pulling image "quay.io/jetstack/cert-manager-controller:v1.3.1"
-0s          Normal   ScalingReplicaSet     deployment/cert-manager-cainjector          Scaled up replica set cert-manager-cainjector-bffcd79d7 to 1
-0s          Normal   SuccessfulCreate      replicaset/cert-manager-cainjector-bffcd79d7   Created pod: cert-manager-cainjector-bffcd79d7-h29qc
-0s          Normal   Scheduled             pod/cert-manager-cainjector-bffcd79d7-h29qc    Successfully assigned operators/cert-manager-cainjector-bffcd79d7-h29qc to cert-manager-olm-control-plane
-0s          Normal   Pulling               pod/cert-manager-cainjector-bffcd79d7-h29qc    Pulling image "quay.io/jetstack/cert-manager-cainjector:v1.3.1"
-0s          Normal   ScalingReplicaSet     deployment/cert-manager-webhook                Scaled up replica set cert-manager-webhook-649f87bd5b to 1
-0s          Normal   SuccessfulCreate      replicaset/cert-manager-webhook-649f87bd5b     Created pod: cert-manager-webhook-649f87bd5b-7swpk
-0s          Normal   Scheduled             pod/cert-manager-webhook-649f87bd5b-7swpk      Successfully assigned operators/cert-manager-webhook-649f87bd5b-7swpk to cert-manager-olm-control-plane
-0s          Normal   Pulling               pod/cert-manager-webhook-649f87bd5b-7swpk      Pulling image "quay.io/jetstack/cert-manager-webhook:v1.3.1"
-0s          Normal   InstallSucceeded      clusterserviceversion/cert-manager.v1.3.1      waiting for install components to report healthy
-0s          Normal   InstallWaiting        clusterserviceversion/cert-manager.v1.3.1      installing: waiting for deployment cert-manager to become ready: deployment "cert-manager" not available: Deployment does not have minimum availability.
-
 ```
 
 Run some of the cert-manager E2E conformance tests:
 
+```sh
+cd projects/cert-manager/cert-manager
+git checkout $(CERT_MANAGER_VERSION)
+make e2e-build
+_bin/test/e2e.test --repo-root=/dev/null --ginkgo.focus="Vault\ Issuer" --ginkgo.skip="Gateway"
 ```
-$ ./devel/run-e2e.sh --ginkgo.focus '[Conformance].*SelfSigned Issuer'
-...
-```
+
+> ⚠️ Requires cert-manager >=v1.14.0.
+> Older versions of the cert-manager E2E tests require a non-standard Vault OCI
+> image to be preloaded into the Kubernetes clusters.
+> See:
+> - https://github.com/cert-manager/cert-manager/pull/6387
+> - https://github.com/cert-manager/cert-manager/pull/6391
+
 
 ## Testing on OpenShift
 
