@@ -25,17 +25,18 @@ help: ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 OLM_PACKAGE_NAME ?= cert-manager
-IMG_BASE ?= gcr.io/jetstack-richard/cert-manager
+IMG_BASE_DEFAULT := ttl.sh/$(shell uuidgen)/cert-manager
+IMG_BASE ?= $(IMG_BASE_DEFAULT)
 BUNDLE_IMG_BASE ?= ${IMG_BASE}-olm-bundle
 BUNDLE_IMG ?= ${BUNDLE_IMG_BASE}:${BUNDLE_VERSION}
 CATALOG_IMG ?= ${IMG_BASE}-olm-catalogue:${CATALOG_VERSION}
 E2E_CLUSTER_NAME ?= cert-manager-olm
 CERT_MANAGER_LOGO_URL ?= https://github.com/cert-manager/website/raw/3998bef91af7266c69f051a2f879be45eb0b3bbb/static/favicons/favicon-256.png
 
-KUSTOMIZE_VERSION ?= 4.5.7
-KIND_VERSION ?= 0.16.0
-OPERATOR_SDK_VERSION ?= 1.25.0
-OPM_VERSION ?= 1.26.2
+KUSTOMIZE_VERSION ?= 5.3.0
+KIND_VERSION ?= 0.21.0
+OPERATOR_SDK_VERSION ?= 1.33.0
+OPM_VERSION ?= 1.36.0
 
 comma := ,
 empty :=
@@ -49,12 +50,19 @@ kustomize = ${bin}/kustomize-${KUSTOMIZE_VERSION}
 kind = ${bin}/kind-${KIND_VERSION}
 operator_sdk = ${bin}/operator-sdk-${OPERATOR_SDK_VERSION}
 opm = ${bin}/opm-${OPM_VERSION}
+cmctl = ${bin}/cmctl-${CERT_MANAGER_VERSION}
 
 ${kustomize}: url := https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${os}_${arch}.tar.gz
 ${kustomize}:
 	mkdir -p $(dir $@)
 	curl -sSL ${url} | tar --directory $(dir $@) -xzf - kustomize
 	mv $(dir $@)/kustomize $@
+
+${cmctl}: url := https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cmctl-$(os)-$(arch).tar.gz
+${cmctl}:
+	mkdir -p $(dir $@)
+	curl -fsSL ${url} | tar --directory $(dir $@) -xzf - cmctl
+	mv $(dir $@)cmctl $@
 
 ${kind}: url := https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-${os}-${arch}
 ${operator_sdk}: url := https://github.com/operator-framework/operator-sdk/releases/download/v${OPERATOR_SDK_VERSION}/operator-sdk_${os}_${arch}
@@ -68,7 +76,12 @@ ${downloadable_executables}:
 	curl --remote-time -sSL -o $@ ${url}
 	chmod +x $@
 
-build_v = build/${BUNDLE_VERSION}
+
+build := build
+$(build):
+		mkdir -p $@
+
+build_v := $(build)/${BUNDLE_VERSION}
 
 cert_manager_manifest_upstream = build/cert-manager.${CERT_MANAGER_VERSION}.upstream.yaml
 ${cert_manager_manifest_upstream}: url := https://github.com/jetstack/cert-manager/releases/download/v${CERT_MANAGER_VERSION}/cert-manager.yaml
@@ -138,7 +151,7 @@ bundle-generate: ${bundle_csv}
 
 .PHONY: bundle-build
 bundle-build: ## Create a cert-manager OLM bundle image
-bundle-build: ${bundle_csv} ${bundle_dockerfile}
+bundle-build:
 	docker build -f ${bundle_dockerfile} -t ${BUNDLE_IMG} ${bundle_dir}
 
 .PHONY: bundle-push
@@ -169,14 +182,16 @@ metadata:
 spec:
  sourceType: grpc
  image: ${CATALOG_IMG}
+ grpcPodConfig:
+  securityContextConfig: restricted
 ---
 endef
 
 .PHONY: catalog-deploy
 catalog-deploy: ## Deploy the catalog to Kubernetes
-catalog-deploy:
-	$(file > build/catalog.yaml,${catalog_yaml})
-	kubectl apply -f build/catalog.yaml
+catalog-deploy: | $(build)
+	$(file > $(build)/catalog.yaml,$(catalog_yaml))
+	kubectl apply -f $(build)/catalog.yaml
 
 define subscription_yaml
 apiVersion: operators.coreos.com/v1alpha1
@@ -211,9 +226,21 @@ kind-cluster: ## Use Kind to create a Kubernetes cluster for E2E tests
 kind-cluster: ${kind}
 	 ${kind} get clusters | grep ${E2E_CLUSTER_NAME} || ${kind} create cluster --name ${E2E_CLUSTER_NAME}
 
+# Give a sense of progress by streaming all the events until the ClusterServiceVersion has been installed,
+# then check the cert-manager API and print the detected cert-manager version.
+#
+# Also works around a bug in `cmctl check api`, where it will return success if
+# the CRDs are installed but the webhook has not been configured. See
+# https://github.com/cert-manager/cert-manager/issues/6721
+#
+# Use process substitution instead of pipe, otherwise kubectl get --watch may hang. See
+# https://stackoverflow.com/a/53382807
 .PHONY: bundle-test
 bundle-test: ## Build bundles and test locally as described at https://operator-framework.github.io/community-operators/testing-operators/
-bundle-test: catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
+bundle-test: $(cmctl) bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
+	sed '/install strategy completed/q' < <(kubectl get events --namespace operators --watch)
+	$(cmctl) check api --wait=5m -v
+	$(cmctl) version -o yaml
 
 .PHONY: clean-kind-cluster
 clean-kind-cluster: ${kind}
