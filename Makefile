@@ -76,7 +76,12 @@ ${downloadable_executables}:
 	curl --remote-time -sSL -o $@ ${url}
 	chmod +x $@
 
-build_v = build/${BUNDLE_VERSION}
+
+build := build
+$(build):
+		mkdir -p $@
+
+build_v := $(build)/${BUNDLE_VERSION}
 
 cert_manager_manifest_upstream = build/cert-manager.${CERT_MANAGER_VERSION}.upstream.yaml
 ${cert_manager_manifest_upstream}: url := https://github.com/jetstack/cert-manager/releases/download/v${CERT_MANAGER_VERSION}/cert-manager.yaml
@@ -184,9 +189,9 @@ endef
 
 .PHONY: catalog-deploy
 catalog-deploy: ## Deploy the catalog to Kubernetes
-catalog-deploy:
-	$(file > build/catalog.yaml,${catalog_yaml})
-	kubectl apply -f build/catalog.yaml
+catalog-deploy: | $(build)
+	$(file > $(build)/catalog.yaml,$(catalog_yaml))
+	kubectl apply -f $(build)/catalog.yaml
 
 define subscription_yaml
 apiVersion: operators.coreos.com/v1alpha1
