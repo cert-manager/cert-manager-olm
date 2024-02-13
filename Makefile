@@ -20,8 +20,8 @@ SHELL := bash
 #   successful.
 #
 # See README.md#Release Process for more details.
-CERT_MANAGER_VERSION ?= 1.14.1
-export BUNDLE_VERSION ?= 1.14.1-rc1
+CERT_MANAGER_VERSION ?= 1.14.2
+export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)-rc1
 
 
 # These variables are computed and should not need to be changed or overridden.
