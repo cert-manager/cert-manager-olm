@@ -6,16 +6,38 @@ SHELL := bash
 .SUFFIXES:
 .ONESHELL:
 
+# Change these values for each cert-manager release
+#
+# CERT_MANAGER_VERSION is the version of cert-manager for which Kubernetes
+# manifests will be downloaded and bundled.
+#
+# BUNDLE_VERSION is the version assigned to the OLM bundle.
+# * Add a pre-release suffix such as `-rc1` and publish the bundle on
+#   community-operators and community-operators-prod, if you want to publish the
+#   package only to the candidate release channel,
+#   for pre-release testing on OpenShift OperatorHub or using operatorhub.io
+# * Remove the pre-release suffix and republish when the testing is complete and
+#   successful.
+#
+# See README.md#Release Process for more details.
 CERT_MANAGER_VERSION ?= 1.14.1
-# Decoupled the BUNDLE_VERSION from the CERT_MANAGER_VERSION so that I can do a
-# patch release containing the fix for:
-# https://github.com/cert-manager/cert-manager/issues/5551
 export BUNDLE_VERSION ?= 1.14.1-rc1
-# DO NOT PUBLISH PRE-RELEASES TO THE STABLE CHANNEL!
-# For stable releases use: `candidate stable`.
-# For pre-releases use: `candidate`.
-BUNDLE_CHANNELS ?= candidate
-STABLE_CHANNEL ?= stable
+
+
+# These variables are computed and should not need to be changed or overridden.
+#
+# BUNDLE_CHANNELS determines which of the OLM release channels this bundle will be assigned to.
+# By default:
+# * if the BUNDLE_VERSION has a pre-release suffix such as `-rc1` this will be `candidate`.
+# * if the BUNDLE_VERSION exactly matches the CERT_MANAGER_VERSION, this will be `stable candidate`.
+BUNDLE_CHANNELS := $(strip $(if $(subst ${CERT_MANAGER_VERSION},${empty},${BUNDLE_VERSION}),,stable) candidate)
+# STABLE_CHANNEL is the default channel for the bundle. By default it will be the first of the BUNDLE_CHANNELS,
+# so make sure that the `stable` channel appears first in that list if it is present.
+STABLE_CHANNEL := $(firstword $(BUNDLE_CHANNELS))
+
+
+# These variables are used for local testing only and it should not be necessary
+# to override them.
 CATALOG_VERSION_DEFAULT := $(shell git describe --tags --always --dirty)
 CATALOG_VERSION ?= $(CATALOG_VERSION_DEFAULT)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
@@ -128,7 +150,7 @@ ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
 	$(abspath ${kustomize}) build $(abspath ${kustomize_config_dir}) | $(abspath ${operator_sdk}) generate bundle \
 		--verbose \
 		--channels $(subst $(space),$(comma),${BUNDLE_CHANNELS}) \
-		--default-channel=$(filter ${STABLE_CHANNEL},${BUNDLE_CHANNELS}) \
+		--default-channel=$(STABLE_CHANNEL) \
 		--package ${OLM_PACKAGE_NAME} \
 		--version ${BUNDLE_VERSION} \
 		--output-dir .
