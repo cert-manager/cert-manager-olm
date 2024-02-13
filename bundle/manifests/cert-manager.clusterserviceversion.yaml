@@ -68,7 +68,7 @@ metadata:
     capabilities: Full Lifecycle
     categories: Security
     containerImage: quay.io/jetstack/cert-manager-controller:v1.14.1
-    createdAt: '2024-02-07T10:48:57'
+    createdAt: '2024-02-13T14:38:11'
     olm.skipRange: '>=1.14.0 <1.14.1-rc1'
     operators.operatorframework.io/builder: operator-sdk-v1.33.0
     operators.operatorframework.io/internal-objects: |-
