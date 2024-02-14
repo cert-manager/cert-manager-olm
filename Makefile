@@ -6,16 +6,38 @@ SHELL := bash
 .SUFFIXES:
 .ONESHELL:
 
-CERT_MANAGER_VERSION ?= 1.13.3
-# Decoupled the BUNDLE_VERSION from the CERT_MANAGER_VERSION so that I can do a
-# patch release containing the fix for:
-# https://github.com/cert-manager/cert-manager/issues/5551
-export BUNDLE_VERSION ?= 1.13.3
-# DO NOT PUBLISH PRE-RELEASES TO THE STABLE CHANNEL!
-# For stable releases use: `candidate stable`.
-# For pre-releases use: `candidate`.
-BUNDLE_CHANNELS ?= candidate stable
-STABLE_CHANNEL ?= stable
+# Change these values for each cert-manager release
+#
+# CERT_MANAGER_VERSION is the version of cert-manager for which Kubernetes
+# manifests will be downloaded and bundled.
+#
+# BUNDLE_VERSION is the version assigned to the OLM bundle.
+# * Add a pre-release suffix such as `-rc1` and publish the bundle on
+#   community-operators and community-operators-prod, if you want to publish the
+#   package only to the candidate release channel,
+#   for pre-release testing on OpenShift OperatorHub or using operatorhub.io
+# * Remove the pre-release suffix and republish when the testing is complete and
+#   successful.
+#
+# See README.md#Release Process for more details.
+CERT_MANAGER_VERSION ?= 1.14.2
+export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)
+
+
+# These variables are computed and should not need to be changed or overridden.
+#
+# BUNDLE_CHANNELS determines which of the OLM release channels this bundle will be assigned to.
+# By default:
+# * if the BUNDLE_VERSION has a pre-release suffix such as `-rc1` this will be `candidate`.
+# * if the BUNDLE_VERSION exactly matches the CERT_MANAGER_VERSION, this will be `stable candidate`.
+BUNDLE_CHANNELS := $(strip $(if $(subst ${CERT_MANAGER_VERSION},${empty},${BUNDLE_VERSION}),,stable) candidate)
+# STABLE_CHANNEL is the default channel for the bundle. By default it will be the first of the BUNDLE_CHANNELS,
+# so make sure that the `stable` channel appears first in that list if it is present.
+STABLE_CHANNEL := $(firstword $(BUNDLE_CHANNELS))
+
+
+# These variables are used for local testing only and it should not be necessary
+# to override them.
 CATALOG_VERSION_DEFAULT := $(shell git describe --tags --always --dirty)
 CATALOG_VERSION ?= $(CATALOG_VERSION_DEFAULT)
 OPERATORHUB_CATALOG_IMAGE ?= quay.io/operatorhubio/catalog:latest
@@ -128,7 +150,7 @@ ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
 	$(abspath ${kustomize}) build $(abspath ${kustomize_config_dir}) | $(abspath ${operator_sdk}) generate bundle \
 		--verbose \
 		--channels $(subst $(space),$(comma),${BUNDLE_CHANNELS}) \
-		--default-channel=$(filter ${STABLE_CHANNEL},${BUNDLE_CHANNELS}) \
+		--default-channel=$(STABLE_CHANNEL) \
 		--package ${OLM_PACKAGE_NAME} \
 		--version ${BUNDLE_VERSION} \
 		--output-dir .
@@ -146,9 +168,22 @@ ${bundle_csv}: ${bundle_osdk_csv} ${fixup_csv} ${cert_manager_logo} ${bundle_csv
 		--config ${bundle_csv_global_config} \
 		< ${bundle_osdk_csv} > $@
 
+# Update the `bundle/` directory.
+#
+# The `metadata/annotations.yaml` file is modified to set minimum supported
+# OpenShift version to v4.6, which ensures that cert-manager will be included in
+# the community-operator catalogs for all versions of OpenShift >= v4.6
+# (OpenShift 4.6 = Kubernetes 1.19).
+#
+# This is also to comply with the static-tests in the community-operators-prod
+# repository. See:
+# * https://redhat-connect.gitbook.io/certified-operator-guide/ocp-deployment/operator-metadata/bundle-directory/managing-openshift-versions
+# * https://redhat-openshift-ecosystem.github.io/community-operators-prod/packaging-required-criteria-ocp/#configure-the-openshift-distribution
+# * https://github.com/redhat-openshift-ecosystem/operator-pipelines/pull/562
 .PHONY: bundle-generate
 bundle-generate: ## Create / update the OLM bundle files
 bundle-generate: ${bundle_csv}
+	yq -i '.annotations."com.redhat.openshift.versions"="v4.6"' $(bundle_dir)/metadata/annotations.yaml
 
 .PHONY: bundle-build
 bundle-build: ## Create a cert-manager OLM bundle image

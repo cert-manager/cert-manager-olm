@@ -51,10 +51,8 @@ which are automatically run when PRs are merged in those two repositories.
 * Update `CERT_MANAGER_VERSION` at the top of the `Makefile`
 * (release candidate only)
   * Add `-rc1` suffix to `BUNDLE_VERSION`
-  * Set `BUNDLE_CHANNELS ?= candidate`
 * (final release only )
   * Remove the `-rc1` suffix from `BUNDLE_VERSION`
-  * Set `BUNDLE_CHANNELS ?= candidate stable`
 * Run `make bundle-generate`
   * Inspect the changes
   * *pause to investigate if there are unexpected changes

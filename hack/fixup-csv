@@ -131,10 +131,13 @@ def main():
     for webhook in doc["spec"]["webhookdefinitions"]:
         webhook["generateName"] = prefixes[webhook["type"]] + "." + "webhooks.cert-manager.io"
 
-    # Workaround for OLM configuring all the webhook DNS names with a `-service` suffix.
-    # See:
-    # https://github.com/operator-framework/operator-lifecycle-manager/blob/15790a8a2f07fe65a3dbf5a45a54d35e20f2cce9/pkg/controller/install/webhook.go#L254
-    # https://github.com/operator-framework/api/blob/b51286920978aa99422358a3db74392437eaadf0/pkg/operators/v1alpha1/clusterserviceversion_types.go#L207
+    # Remove all default the --dynamic-serving- flags of the webhook deployment,
+    # because the dynamic serving certificate feature is not used in the OLM package.
+    #
+    # Instead OLM creates the key and cert which is mounted into the webhook Pod,
+    # and it creates an additional Service with a `cert-manager-webhook-service` suffix,
+    # which is referenced in the validating and mutating webhook
+    # configurations, which OLM also creates.
     for deployment in doc["spec"]["install"]["spec"]["deployments"]:
         # [0]["spec"]["template"]["spec"]["containers"][0]["image"]
         if deployment["name"] != "cert-manager-webhook":
@@ -146,14 +149,13 @@ def main():
             args = [
                 a for a in container["args"]
                 if not a.startswith((
-                        "--dynamic-serving-dns-names",
+                        "--dynamic-serving-",
                         "--tls-cert-file",
                         "--tls-private-key-file",
                 ))
             ]
             # Add the arguments back with the modified values
             args.extend([
-                "--dynamic-serving-dns-names=cert-manager-webhook-service.$(POD_NAMESPACE).svc",
                 # Use certificate paths that are compatible with OpenShift 4.6:
                 # https://olm.operatorframework.io/docs/advanced-tasks/adding-admission-and-conversion-webhooks/#certificate-authority-requirements
                 "--tls-cert-file=/apiserver.local.config/certificates/apiserver.crt",
