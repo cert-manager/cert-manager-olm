@@ -21,7 +21,7 @@ SHELL := bash
 #
 # See README.md#Release Process for more details.
 CERT_MANAGER_VERSION ?= 1.14.2
-export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)-rc1
+export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)
 
 
 # These variables are computed and should not need to be changed or overridden.
