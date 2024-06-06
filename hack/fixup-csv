@@ -29,22 +29,10 @@ from datetime import datetime
 import semver
 import yaml
 
-
-class literal(str):
-    """
-    This is a way to force the yaml encoder to output text in block format
-    rather than as quoted strings.
-
-    See https://til.simonwillison.net/python/style-yaml-dump
-    """
-
-
-def literal_presenter(dumper, data):
-    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style="|")
-
-
-yaml.add_representer(literal, literal_presenter)
-
+def str_presenter(dumper, data):
+  if len(data.splitlines()) > 1:  # check for multiline string
+    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='|')
+  return dumper.represent_scalar('tag:yaml.org,2002:str', data)
 
 def main():
     """
@@ -100,22 +88,20 @@ def main():
     # Ideally these would be hidden from the WebUI in operatorhub.io, but they
     # are not.
     # See https://github.com/k8s-operatorhub/operatorhub.io/issues/14
-    doc["metadata"]["annotations"]["operators.operatorframework.io/internal-objects"] = literal(
-        json.dumps(internal_objects, indent=2)
-    )
+    doc["metadata"]["annotations"]["operators.operatorframework.io/internal-objects"] = json.dumps(internal_objects, indent=2)
     doc["metadata"]["annotations"]["capabilities"] = conf["capabilities"]
     doc["metadata"]["annotations"]["categories"] = ",".join(conf["categories"])
     doc["metadata"]["annotations"]["containerImage"] = doc["spec"]["install"]["spec"]["deployments"][0]["spec"]["template"]["spec"]["containers"][0]["image"]
     doc["metadata"]["annotations"]["createdAt"] = datetime.utcnow().isoformat(timespec="seconds")
     doc["metadata"]["annotations"]["support"] = conf["support"]
     doc["metadata"]["annotations"]["repository"] = conf["repository"]
-    doc["metadata"]["annotations"]["alm-examples"] = literal(json.dumps(conf["alm_examples"], indent=2))
+    doc["metadata"]["annotations"]["alm-examples"] = json.dumps(conf["alm_examples"], indent=2)
     doc["spec"]["icon"] = [{
         "base64data": logo_b64.decode("ascii"),
         "mediatype": logo_type,
     }]
     doc["spec"]["displayName"] = conf["display_name"]
-    doc["spec"]["description"] = literal(conf["description"])
+    doc["spec"]["description"] = conf["description"]
     doc["spec"]["minKubeVersion"] = conf["min_kubernetes_version"]
     doc["spec"]["keywords"] = conf["keywords"]
     doc["spec"]["links"] = conf["links"]
@@ -166,6 +152,7 @@ def main():
         else:
             raise Exception("webhook container not found")
 
+    yaml.add_representer(str, str_presenter)
     yaml.dump(doc, sys.stdout)
 
 

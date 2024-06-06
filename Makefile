@@ -20,7 +20,7 @@ SHELL := bash
 #   successful.
 #
 # See README.md#Release Process for more details.
-CERT_MANAGER_VERSION ?= 1.14.2
+CERT_MANAGER_VERSION ?= 1.15.0
 export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)
 
 
@@ -48,7 +48,7 @@ help: ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n\nTargets:\n"} /^[0-9a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 
 OLM_PACKAGE_NAME ?= cert-manager
-IMG_BASE_DEFAULT := ttl.sh/$(shell uuidgen)/cert-manager
+IMG_BASE_DEFAULT := ttl.sh/$(shell uuidgen | tr A-Z a-z)/cert-manager
 IMG_BASE ?= $(IMG_BASE_DEFAULT)
 BUNDLE_IMG_BASE ?= ${IMG_BASE}-olm-bundle
 BUNDLE_IMG ?= ${BUNDLE_IMG_BASE}:${BUNDLE_VERSION}
@@ -60,6 +60,7 @@ KUSTOMIZE_VERSION ?= 5.3.0
 KIND_VERSION ?= 0.21.0
 OPERATOR_SDK_VERSION ?= 1.33.0
 OPM_VERSION ?= 1.36.0
+CMCTL_VERSION ?= 2.0.0
 
 comma := ,
 empty :=
@@ -73,7 +74,7 @@ kustomize = ${bin}/kustomize-${KUSTOMIZE_VERSION}
 kind = ${bin}/kind-${KIND_VERSION}
 operator_sdk = ${bin}/operator-sdk-${OPERATOR_SDK_VERSION}
 opm = ${bin}/opm-${OPM_VERSION}
-cmctl = ${bin}/cmctl-${CERT_MANAGER_VERSION}
+cmctl = ${bin}/cmctl-${CMCTL_VERSION}
 
 ${kustomize}: url := https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${KUSTOMIZE_VERSION}/kustomize_v${KUSTOMIZE_VERSION}_${os}_${arch}.tar.gz
 ${kustomize}:
@@ -81,11 +82,11 @@ ${kustomize}:
 	curl -sSL ${url} | tar --directory $(dir $@) -xzf - kustomize
 	mv $(dir $@)/kustomize $@
 
-${cmctl}: url := https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cmctl-$(os)-$(arch).tar.gz
+${cmctl}: url := https://github.com/cert-manager/cmctl/releases/download/v$(CMCTL_VERSION)/cmctl_$(os)_$(arch)
 ${cmctl}:
 	mkdir -p $(dir $@)
-	curl -fsSL ${url} | tar --directory $(dir $@) -xzf - cmctl
-	mv $(dir $@)cmctl $@
+	curl -fsSL ${url} > $@
+	chmod +x $@
 
 ${kind}: url := https://github.com/kubernetes-sigs/kind/releases/download/v${KIND_VERSION}/kind-${os}-${arch}
 ${operator_sdk}: url := https://github.com/operator-framework/operator-sdk/releases/download/v${OPERATOR_SDK_VERSION}/operator-sdk_${os}_${arch}
@@ -107,7 +108,7 @@ $(build):
 build_v := $(build)/${BUNDLE_VERSION}
 
 cert_manager_manifest_upstream = build/cert-manager.${CERT_MANAGER_VERSION}.upstream.yaml
-${cert_manager_manifest_upstream}: url := https://github.com/jetstack/cert-manager/releases/download/v${CERT_MANAGER_VERSION}/cert-manager.yaml
+${cert_manager_manifest_upstream}: url := https://github.com/cert-manager/cert-manager/releases/download/v${CERT_MANAGER_VERSION}/cert-manager.yaml
 
 cert_manager_logo = build/cert-manager-logo.png
 ${cert_manager_logo}: url := ${CERT_MANAGER_LOGO_URL}
@@ -133,9 +134,9 @@ scorecard_dir = config/scorecard
 scorecard_files := $(shell find ${scorecard_dir} -type f)
 kustomize_config = ${kustomize_config_dir}/kustomization.yaml
 ${kustomize_config}: ${kustomize_csv} ${scorecard_files} ${kustomize}
-	mkdir -p ${kustomize_config_dir}
-	rm -f $@
-	cd ${kustomize_config_dir}
+	mkdir -p ${kustomize_config_dir} && \
+	rm -f $@  && \
+	cd ${kustomize_config_dir}  && \
 	$(abspath ${kustomize}) create --resources ../../../config/scorecard,csv.yaml
 
 # We have to use `cat` and pipe the manifest rather than using it as stdin due
@@ -144,9 +145,9 @@ ${kustomize_config}: ${kustomize_csv} ${scorecard_files} ${kustomize}
 bundle_osdk_dir = ${build_v}/bundle_osdk
 bundle_osdk_csv = ${bundle_osdk_dir}/manifests/cert-manager.clusterserviceversion.yaml
 ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
-	rm -rf ${bundle_osdk_dir}
-	mkdir -p ${bundle_osdk_dir}
-	cd ${bundle_osdk_dir}
+	rm -rf ${bundle_osdk_dir} && \
+	mkdir -p ${bundle_osdk_dir} && \
+	cd ${bundle_osdk_dir} && \
 	$(abspath ${kustomize}) build $(abspath ${kustomize_config_dir}) | $(abspath ${operator_sdk}) generate bundle \
 		--verbose \
 		--channels $(subst $(space),$(comma),${BUNDLE_CHANNELS}) \
@@ -275,7 +276,7 @@ kind-cluster: ${kind}
 bundle-test: ## Build bundles and test locally as described at https://operator-framework.github.io/community-operators/testing-operators/
 bundle-test: $(cmctl) bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
 	timeout 5m sed '/install strategy completed/q' < <(kubectl get events --namespace operators --watch)
-	$(cmctl) check api --wait=5m -v
+	$(cmctl) check api --wait=5m 
 	$(cmctl) version -o yaml
 
 .PHONY: clean-kind-cluster
