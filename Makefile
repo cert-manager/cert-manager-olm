@@ -20,7 +20,7 @@ SHELL := bash
 #   successful.
 #
 # See README.md#Release Process for more details.
-CERT_MANAGER_VERSION ?= 1.14.2
+CERT_MANAGER_VERSION ?= 1.15.0
 export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)
 
 
@@ -107,7 +107,7 @@ $(build):
 build_v := $(build)/${BUNDLE_VERSION}
 
 cert_manager_manifest_upstream = build/cert-manager.${CERT_MANAGER_VERSION}.upstream.yaml
-${cert_manager_manifest_upstream}: url := https://github.com/jetstack/cert-manager/releases/download/v${CERT_MANAGER_VERSION}/cert-manager.yaml
+${cert_manager_manifest_upstream}: url := https://github.com/cert-manager/cert-manager/releases/download/v${CERT_MANAGER_VERSION}/cert-manager.yaml
 
 cert_manager_logo = build/cert-manager-logo.png
 ${cert_manager_logo}: url := ${CERT_MANAGER_LOGO_URL}
@@ -133,9 +133,9 @@ scorecard_dir = config/scorecard
 scorecard_files := $(shell find ${scorecard_dir} -type f)
 kustomize_config = ${kustomize_config_dir}/kustomization.yaml
 ${kustomize_config}: ${kustomize_csv} ${scorecard_files} ${kustomize}
-	mkdir -p ${kustomize_config_dir}
-	rm -f $@
-	cd ${kustomize_config_dir}
+	mkdir -p ${kustomize_config_dir} && \
+	rm -f $@  && \
+	cd ${kustomize_config_dir}  && \
 	$(abspath ${kustomize}) create --resources ../../../config/scorecard,csv.yaml
 
 # We have to use `cat` and pipe the manifest rather than using it as stdin due
@@ -144,9 +144,9 @@ ${kustomize_config}: ${kustomize_csv} ${scorecard_files} ${kustomize}
 bundle_osdk_dir = ${build_v}/bundle_osdk
 bundle_osdk_csv = ${bundle_osdk_dir}/manifests/cert-manager.clusterserviceversion.yaml
 ${bundle_osdk_csv}: ${operator_sdk} ${kustomize_config} ${kustomize}
-	rm -rf ${bundle_osdk_dir}
-	mkdir -p ${bundle_osdk_dir}
-	cd ${bundle_osdk_dir}
+	rm -rf ${bundle_osdk_dir} && \
+	mkdir -p ${bundle_osdk_dir} && \
+	cd ${bundle_osdk_dir} && \
 	$(abspath ${kustomize}) build $(abspath ${kustomize_config_dir}) | $(abspath ${operator_sdk}) generate bundle \
 		--verbose \
 		--channels $(subst $(space),$(comma),${BUNDLE_CHANNELS}) \
