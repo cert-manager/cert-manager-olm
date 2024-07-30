@@ -20,7 +20,7 @@ SHELL := bash
 #   successful.
 #
 # See README.md#Release Process for more details.
-CERT_MANAGER_VERSION ?= 1.15.0
+CERT_MANAGER_VERSION ?= 1.15.2
 export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)
 
 
@@ -276,7 +276,7 @@ kind-cluster: ${kind}
 bundle-test: ## Build bundles and test locally as described at https://operator-framework.github.io/community-operators/testing-operators/
 bundle-test: $(cmctl) bundle-build bundle-push catalog-build catalog-push kind-cluster deploy-olm catalog-deploy subscription-deploy
 	timeout 5m sed '/install strategy completed/q' < <(kubectl get events --namespace operators --watch)
-	$(cmctl) check api --wait=5m 
+	$(cmctl) check api --wait=5m
 	$(cmctl) version -o yaml
 
 .PHONY: clean-kind-cluster
