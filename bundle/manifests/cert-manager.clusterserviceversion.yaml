@@ -67,9 +67,8 @@ metadata:
       ]
     capabilities: Full Lifecycle
     categories: Security
-    containerImage: quay.io/jetstack/cert-manager-controller:v1.15.2
-    createdAt: '2024-07-30T13:50:01'
-    olm.skipRange: '>=1.15.0 <1.15.2'
+    containerImage: quay.io/jetstack/cert-manager-controller:v1.16.0-beta.0
+    createdAt: '2024-10-02T16:10:00'
     operators.operatorframework.io/builder: operator-sdk-v1.33.0
     operators.operatorframework.io/internal-objects: |-
       [
@@ -84,7 +83,7 @@ metadata:
     operatorframework.io/arch.arm64: supported
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
-  name: cert-manager.v1.15.2
+  name: cert-manager.v1.16.0-beta.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -94,11 +93,9 @@ spec:
         A CertificateRequest is used to request a signed certificate from one of the
         configured issuers.
 
-
         All fields within the CertificateRequest's `spec` are immutable after creation.
         A CertificateRequest will either succeed or fail, as denoted by its `Ready` status
         condition and its `status.failureTime` field.
-
 
         A CertificateRequest is a one-shot resource, meaning it represents a single
         point in time request for a certificate and cannot be re-used.
@@ -109,7 +106,6 @@ spec:
     - description: |-
         A Certificate resource should be created to ensure an up to date and signed
         X.509 certificate is stored in the Kubernetes Secret resource named in `spec.secretName`.
-
 
         The stored certificate will be renewed before it expires (as configured by `spec.renewBefore`).
       displayName: Certificate
@@ -633,7 +629,7 @@ spec:
           app.kubernetes.io/component: controller
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: cert-manager
-          app.kubernetes.io/version: v1.15.2
+          app.kubernetes.io/version: v1.16.0-beta.0
         name: cert-manager
         spec:
           replicas: 1
@@ -654,21 +650,21 @@ spec:
                 app.kubernetes.io/component: controller
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: cert-manager
-                app.kubernetes.io/version: v1.15.2
+                app.kubernetes.io/version: v1.16.0-beta.0
             spec:
               containers:
               - args:
                 - --v=2
                 - --cluster-resource-namespace=$(POD_NAMESPACE)
                 - --leader-election-namespace=kube-system
-                - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.15.2
+                - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.16.0-beta.0
                 - --max-concurrent-challenges=60
                 env:
                 - name: POD_NAMESPACE
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-controller:v1.15.2
+                image: quay.io/jetstack/cert-manager-controller:v1.16.0-beta.0
                 imagePullPolicy: IfNotPresent
                 livenessProbe:
                   failureThreshold: 8
@@ -708,7 +704,7 @@ spec:
           app.kubernetes.io/component: cainjector
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: cainjector
-          app.kubernetes.io/version: v1.15.2
+          app.kubernetes.io/version: v1.16.0-beta.0
         name: cert-manager-cainjector
         spec:
           replicas: 1
@@ -720,12 +716,16 @@ spec:
           strategy: {}
           template:
             metadata:
+              annotations:
+                prometheus.io/path: /metrics
+                prometheus.io/port: '9402'
+                prometheus.io/scrape: 'true'
               labels:
                 app: cainjector
                 app.kubernetes.io/component: cainjector
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: cainjector
-                app.kubernetes.io/version: v1.15.2
+                app.kubernetes.io/version: v1.16.0-beta.0
             spec:
               containers:
               - args:
@@ -736,9 +736,13 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-cainjector:v1.15.2
+                image: quay.io/jetstack/cert-manager-cainjector:v1.16.0-beta.0
                 imagePullPolicy: IfNotPresent
                 name: cert-manager-cainjector
+                ports:
+                - containerPort: 9402
+                  name: http-metrics
+                  protocol: TCP
                 resources: {}
                 securityContext:
                   allowPrivilegeEscalation: false
@@ -759,7 +763,7 @@ spec:
           app.kubernetes.io/component: webhook
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: webhook
-          app.kubernetes.io/version: v1.15.2
+          app.kubernetes.io/version: v1.16.0-beta.0
         name: cert-manager-webhook
         spec:
           replicas: 1
@@ -771,12 +775,16 @@ spec:
           strategy: {}
           template:
             metadata:
+              annotations:
+                prometheus.io/path: /metrics
+                prometheus.io/port: '9402'
+                prometheus.io/scrape: 'true'
               labels:
                 app: webhook
                 app.kubernetes.io/component: webhook
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: webhook
-                app.kubernetes.io/version: v1.15.2
+                app.kubernetes.io/version: v1.16.0-beta.0
             spec:
               containers:
               - args:
@@ -789,7 +797,7 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-webhook:v1.15.2
+                image: quay.io/jetstack/cert-manager-webhook:v1.16.0-beta.0
                 imagePullPolicy: IfNotPresent
                 livenessProbe:
                   failureThreshold: 3
@@ -808,6 +816,9 @@ spec:
                   protocol: TCP
                 - containerPort: 6080
                   name: healthcheck
+                  protocol: TCP
+                - containerPort: 9402
+                  name: http-metrics
                   protocol: TCP
                 readinessProbe:
                   failureThreshold: 3
@@ -836,6 +847,14 @@ spec:
               serviceAccountName: cert-manager-webhook
       permissions:
       - rules:
+        - apiGroups:
+          - ''
+          resourceNames:
+          - cert-manager
+          resources:
+          - serviceaccounts/token
+          verbs:
+          - create
         - apiGroups:
           - coordination.k8s.io
           resourceNames:
@@ -919,7 +938,7 @@ spec:
   provider:
     name: The cert-manager maintainers
     url: https://cert-manager.io/
-  version: 1.15.2
+  version: 1.16.0-beta.0
   webhookdefinitions:
   - admissionReviewVersions:
     - v1
