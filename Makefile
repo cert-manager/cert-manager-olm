@@ -20,16 +20,16 @@ SHELL := bash
 #   successful.
 #
 # See README.md#Release Process for more details.
-CERT_MANAGER_VERSION ?= 1.16.0-beta.0
+CERT_MANAGER_VERSION ?= 1.16.1
 export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)
 
 
 # BUNDLE_CHANNELS determines which of the OLM release channels this bundle will be assigned to.
 # * if the BUNDLE_VERSION has a pre-release suffix such as `-rc1` this should be `candidate`.
 # * else this should be `stable candidate`.
-BUNDLE_CHANNELS := candidate
+BUNDLE_CHANNELS := stable candidate
 # STABLE_CHANNEL is the default channel for the bundle. It should be the first of the BUNDLE_CHANNELS,
-STABLE_CHANNEL := candidate
+STABLE_CHANNEL := stable
 
 # These variables are used for local testing only and it should not be necessary
 # to override them.
