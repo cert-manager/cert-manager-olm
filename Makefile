@@ -288,7 +288,7 @@ clean-bundle-test: ${kind}
 # on your laptop, and the version you supply will then be added to the metadata
 # of the VM so that it can be downloaded from the metadata API by the crc setup
 # scripts that run inside the VM.
-OPENSHIFT_VERSION ?= 4.14
+OPENSHIFT_VERSION ?= 4.17
 
 # The path to the pull-secret which you download from https://console.redhat.com/openshift/create/local
 PULL_SECRET ?=
