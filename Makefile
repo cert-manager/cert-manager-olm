@@ -303,20 +303,26 @@ CRC_INSTANCE_NAME ?= crc-$(subst .,-,${OPENSHIFT_VERSION})
 startup_script := hack/crc-instance-startup-script.sh
 crc_makefile := hack/crc.mk
 
+# According to Copilot: The approximate cost of running a preemptible
+# c3-standard-8 machine VM in the europe-west1-b region of Google Cloud is
+# around $88.31 per month. Preemptible VMs are significantly cheaper than
+# standard VMs because they can be terminated by Google Cloud at any time if the
+# resources are needed elsewhere.
+# https://cloud.google.com/compute/vm-instance-pricing
+#
+# To get a list of suitable machine types:
+#  gcloud compute machine-types list --filter="zone:europe-west1-b AND guestCpus=8 AND memoryMb=32768"
 .PHONY: crc-instance
 crc-instance: ## Create a Google Cloud Instance with a crc OpenShift cluster
 crc-instance: ${PULL_SECRET} ${startup_script} ${crc_makefile}
 	: $${PULL_SECRET:?"Please set PULL_SECRET to the path to the pull-secret downloaded from https://console.redhat.com/openshift/create/local"}
 	gcloud compute instances create ${CRC_INSTANCE_NAME} \
 		--enable-nested-virtualization \
-		--min-cpu-platform="Intel Haswell" \
-		--custom-memory 32GiB \
-		--custom-cpu 8 \
 		--image-family=rhel-8 \
 		--image-project=rhel-cloud \
 		--preemptible \
+		--machine-type=c3-standard-8 \
 		--boot-disk-size=200GiB \
-		--boot-disk-type=pd-ssd \
 		--metadata-from-file=make-file=${crc_makefile},pull-secret=${PULL_SECRET},startup-script=${startup_script} \
 		--metadata=openshift-version=${OPENSHIFT_VERSION}
 	until gcloud compute ssh crc@${CRC_INSTANCE_NAME} -- sudo systemctl is-system-running --wait; do sleep 2; done >/dev/null
