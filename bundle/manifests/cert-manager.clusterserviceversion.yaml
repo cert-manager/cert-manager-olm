@@ -67,9 +67,9 @@ metadata:
       ]
     capabilities: Full Lifecycle
     categories: Security
-    containerImage: quay.io/jetstack/cert-manager-controller:v1.16.1
-    createdAt: '2024-10-09T14:20:33'
-    olm.skipRange: '>=1.16.0 <1.16.1'
+    containerImage: quay.io/jetstack/cert-manager-controller:v1.16.5
+    createdAt: '2025-05-02T09:11:31'
+    olm.skipRange: '>=1.16.0 <1.16.5'
     operators.operatorframework.io/builder: operator-sdk-v1.33.0
     operators.operatorframework.io/internal-objects: |-
       [
@@ -84,7 +84,7 @@ metadata:
     operatorframework.io/arch.arm64: supported
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
-  name: cert-manager.v1.16.1
+  name: cert-manager.v1.16.5
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -630,7 +630,7 @@ spec:
           app.kubernetes.io/component: controller
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: cert-manager
-          app.kubernetes.io/version: v1.16.1
+          app.kubernetes.io/version: v1.16.5
         name: cert-manager
         spec:
           replicas: 1
@@ -651,21 +651,21 @@ spec:
                 app.kubernetes.io/component: controller
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: cert-manager
-                app.kubernetes.io/version: v1.16.1
+                app.kubernetes.io/version: v1.16.5
             spec:
               containers:
               - args:
                 - --v=2
                 - --cluster-resource-namespace=$(POD_NAMESPACE)
                 - --leader-election-namespace=kube-system
-                - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.16.1
+                - --acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.16.5
                 - --max-concurrent-challenges=60
                 env:
                 - name: POD_NAMESPACE
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-controller:v1.16.1
+                image: quay.io/jetstack/cert-manager-controller:v1.16.5
                 imagePullPolicy: IfNotPresent
                 livenessProbe:
                   failureThreshold: 8
@@ -705,7 +705,7 @@ spec:
           app.kubernetes.io/component: cainjector
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: cainjector
-          app.kubernetes.io/version: v1.16.1
+          app.kubernetes.io/version: v1.16.5
         name: cert-manager-cainjector
         spec:
           replicas: 1
@@ -726,7 +726,7 @@ spec:
                 app.kubernetes.io/component: cainjector
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: cainjector
-                app.kubernetes.io/version: v1.16.1
+                app.kubernetes.io/version: v1.16.5
             spec:
               containers:
               - args:
@@ -737,7 +737,7 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-cainjector:v1.16.1
+                image: quay.io/jetstack/cert-manager-cainjector:v1.16.5
                 imagePullPolicy: IfNotPresent
                 name: cert-manager-cainjector
                 ports:
@@ -764,7 +764,7 @@ spec:
           app.kubernetes.io/component: webhook
           app.kubernetes.io/instance: cert-manager
           app.kubernetes.io/name: webhook
-          app.kubernetes.io/version: v1.16.1
+          app.kubernetes.io/version: v1.16.5
         name: cert-manager-webhook
         spec:
           replicas: 1
@@ -785,7 +785,7 @@ spec:
                 app.kubernetes.io/component: webhook
                 app.kubernetes.io/instance: cert-manager
                 app.kubernetes.io/name: webhook
-                app.kubernetes.io/version: v1.16.1
+                app.kubernetes.io/version: v1.16.5
             spec:
               containers:
               - args:
@@ -798,7 +798,7 @@ spec:
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.namespace
-                image: quay.io/jetstack/cert-manager-webhook:v1.16.1
+                image: quay.io/jetstack/cert-manager-webhook:v1.16.5
                 imagePullPolicy: IfNotPresent
                 livenessProbe:
                   failureThreshold: 3
@@ -939,7 +939,7 @@ spec:
   provider:
     name: The cert-manager maintainers
     url: https://cert-manager.io/
-  version: 1.16.1
+  version: 1.16.5
   webhookdefinitions:
   - admissionReviewVersions:
     - v1
