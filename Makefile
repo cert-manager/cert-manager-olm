@@ -20,7 +20,7 @@ SHELL := bash
 #   successful.
 #
 # See README.md#Release Process for more details.
-CERT_MANAGER_VERSION ?= 1.16.1
+CERT_MANAGER_VERSION ?= 1.16.5
 export BUNDLE_VERSION ?= $(CERT_MANAGER_VERSION)
 
 
