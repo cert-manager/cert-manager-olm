@@ -2,6 +2,20 @@
 
 # cert-manager packages for OLM
 
+### 📢 OperatorHub Packages Discontinued
+
+We no longer publish OperatorHub packages for cert-manager.
+Why? Because the cert-manager maintainers no longer have the time or resources to maintain and test those packages.
+cert-manager `v1.16.5` is the last release on OperatorHub.
+
+> 📖 Read the [cert-manager 1.16 release notes](https://cert-manager.io/docs/releases/release-notes/release-notes-1.16) to learn more.
+>
+> ℹ️ [cert-manager `v1.16.5` for RedHat OpenShift OperatorHub](https://github.com/redhat-openshift-ecosystem/community-operators-prod/tree/main/operators/cert-manager/1.16.5).
+>
+> ℹ️ [cert-manager `v1.16.5` for `operatorhub.io`](https://github.com/k8s-operatorhub/community-operators/tree/main/operators/cert-manager/1.16.5).
+
+### Overview
+
 This repository contains scripts and files that are used to package cert-manager for Red Hat's [Operator Lifecycle Manager (OLM)][].
 This allows users of [OpenShift][] and [OperatorHub][] to easily install cert-manager into their clusters.
 It is currently an experimental deployment method.
